@@ -38,7 +38,7 @@ const Navbar = () => {
                                 {isAdmin && (
                                     <Link
                                         href="/admin-panel"
-                                        className="mr-4 text-primary font-bold"
+                                        className="mr-4 text-primary font-semibold"
                                     >
                                         Admin Panel
                                     </Link>
