@@ -1,68 +1,81 @@
-import FormTambahKamar from '@/components/admin/FormTambahKamar';
 import { supabaseAdmin } from '@/lib/supabase';
-import { currentUser } from '@clerk/nextjs/server' 
+import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import RoomGrid from '@/components/admin/RoomGrid';
 
-// 1. Definisikan tipe data agar TypeScript mengerti
 type Kamar = {
   id: string;
-  nama_kamar: string;
-  nomor_lantai: number;
-  harga: number;
-  created_at: string;
-}
+  room_number: string;
+  floor: number;
+  price_per_month: number;
+  status: 'available' | 'occupied' | 'maintenance';
+};
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminPage() {
   const user = await currentUser();
-  const isAdmin = user?.publicMetadata?.role === 'admin';
 
+  // Proteksi Halaman Admin
+  const isAdmin = user?.publicMetadata?.role === 'admin';
   if (!isAdmin) {
-    return redirect('/'); 
+    return redirect('/');
   }
 
+  // Ambil data 45 kamar dari tabel 'rooms'
   const { data: rawData, error } = await supabaseAdmin
-    .from('kamar_lt1')
+    .from('rooms')
     .select('*')
-    .order('created_at', { ascending: false })
+    .order('room_number', { ascending: true });
 
   if (error) {
-    return <div>Error loading data: {error.message}</div>
+    return (
+      <div className="p-8 text-red-500">
+        Gagal memuat data database: {error.message}
+      </div>
+    );
   }
-
-  
   const rooms = rawData as Kamar[];
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Manajemen Kamar</h1>
+        <p className="text-gray-500">Total {rooms.length} Kamar di Kost Griya Citra</p>
+        <p className="text-gray-500">Klik pada kamar kosong untuk mendaftarkan penyewa baru.</p>
+      </header>
 
-      <div className="mb-10 max-w-2xl">
-         <FormTambahKamar />
+      {/* --- STATISTIK --- */}
+      <div className="grid grid-cols-3 gap-4 mb-10">
+        <div className="bg-white p-4 rounded-xl border shadow-sm text-center md:text-left">
+          <p className="text-xs text-gray-500 uppercase font-bold">Kosong</p>
+          <p className="text-2xl font-bold text-green-600">
+            {rooms.filter(r => r.status === 'available').length}
+          </p>
+        </div>
+        <div className="bg-white p-4 rounded-xl border shadow-sm text-center md:text-left">
+          <p className="text-xs text-gray-500 uppercase font-bold">Terisi</p>
+          <p className="text-2xl font-bold text-blue-600">
+            {rooms.filter(r => r.status === 'occupied').length}
+          </p>
+        </div>
+        <div className="bg-white p-4 rounded-xl border shadow-sm text-center md:text-left">
+          <p className="text-xs text-gray-500 uppercase font-bold">Perbaikan</p>
+          <p className="text-2xl font-bold text-yellow-600">
+            {rooms.filter(r => r.status === 'maintenance').length}
+          </p>
+        </div>
       </div>
 
-      <h2 className="text-2xl font-bold mb-6">Daftar Kamar (Direct Supabase)</h2>
-      
-      
-      {!rooms || rooms.length === 0 ? (
-        <p className="text-gray-500">Belum ada data kamar.</p>
+      {/* --- KOMPONEN ROOM GRID --- */}
+      {rooms.length > 0 ? (
+        <RoomGrid rooms={rooms} />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {rooms.map((item) => (
-            <div key={item.id} className="border p-4 rounded-xl bg-white shadow-sm hover:shadow-md transition flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-lg text-gray-800">{item.nama_kamar}</h3>
-                <p className="text-sm text-gray-500">Lantai {item.nomor_lantai}</p>
-              </div>
-              <div className="text-right">
-                <p className="font-mono text-primary font-bold text-lg">
-                   Rp {item.harga.toLocaleString('id-ID')}
-                </p>
-              </div>
-            </div>
-          ))}
+        <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed">
+          <p className="text-gray-500">Belum ada data kamar di database.</p>
         </div>
       )}
+      
     </div>
-  )
+  );
 }
