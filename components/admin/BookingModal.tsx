@@ -45,8 +45,18 @@ export default function BookingModal({ isOpen, onClose, room }: any) {
           <input type="hidden" name="room_id" value={room.id} />
           <input type="hidden" name="room_number" value={room.room_number} />
           <input type="hidden" name="amount" value={room.price_per_month} />
+
+          
           {/* ID sementara untuk penyewa (misal manual_hp) */}
-          <input type="hidden" name="user_id" value={`manual_${Date.now()}`} />
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">ID Clerk Penyewa</label>
+            <input
+              name="user_id"
+              required
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-yellow-50"
+              placeholder="Paste ID Clerk (user_...) di sini"
+            />
+          </div>
 
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nama Penyewa</label>

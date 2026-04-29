@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import BookingModal from "./BookingModal";
+import OccupiedModal from "./OccupiedModal"; // 1. Import Modal Baru
 
 type Kamar = {
   id: string;
@@ -13,17 +14,23 @@ type Kamar = {
 
 export default function RoomGrid({ rooms }: { rooms: Kamar[] }) {
   const [selectedRoom, setSelectedRoom] = useState<Kamar | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // 2. Pisahkan state untuk masing-masing modal
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isOccupiedModalOpen, setIsOccupiedModalOpen] = useState(false);
 
-  // Filter lantai secara otomatis
   const floors = Array.from(new Set(rooms.map((r) => r.floor))).sort();
 
   const handleRoomClick = (room: Kamar) => {
+    setSelectedRoom(room);
+    
+    // 3. Logika untuk menentukan modal mana yang terbuka
     if (room.status === 'available') {
-      setSelectedRoom(room);
-      setIsModalOpen(true);
+      setIsBookingModalOpen(true);
+    } else if (room.status === 'occupied') {
+      setIsOccupiedModalOpen(true);
     } else {
-      alert("Kamar ini sudah terisi atau dalam perbaikan.");
+      alert("Kamar ini sedang dalam perbaikan.");
     }
   };
 
@@ -44,7 +51,9 @@ export default function RoomGrid({ rooms }: { rooms: Kamar[] }) {
                 key={kamar.id} 
                 onClick={() => handleRoomClick(kamar)}
                 className={`bg-white border rounded-xl p-4 shadow-sm transition-all group cursor-pointer hover:shadow-md ${
-                  kamar.status === 'available' ? 'hover:border-blue-500' : 'opacity-75 cursor-not-allowed'
+                  kamar.status === 'available' ? 'hover:border-green-500' : 
+                  kamar.status === 'occupied' ? 'hover:border-blue-500' : 
+                  'opacity-75 cursor-not-allowed'
                 }`}
               >
                 <div className="flex justify-between items-start mb-2">
@@ -68,11 +77,20 @@ export default function RoomGrid({ rooms }: { rooms: Kamar[] }) {
         </div>
       ))}
 
-      {/* Tampilkan Modal jika state terbuka */}
+      {/* Render Modal Booking */}
       {selectedRoom && (
         <BookingModal 
-          isOpen={isModalOpen} 
-          onClose={() => setIsModalOpen(false)} 
+          isOpen={isBookingModalOpen} 
+          onClose={() => setIsBookingModalOpen(false)} 
+          room={selectedRoom} 
+        />
+      )}
+
+      {/* Render Modal Penghuni Terisi */}
+      {selectedRoom && (
+        <OccupiedModal 
+          isOpen={isOccupiedModalOpen} 
+          onClose={() => setIsOccupiedModalOpen(false)} 
           room={selectedRoom} 
         />
       )}

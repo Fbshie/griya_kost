@@ -32,7 +32,7 @@ const Navbar = () => {
                                 </SignInButton>
                             </SignedOut>
                             <SignedIn>
-                                <Link className='mr-3 text-primary font-semibold' href={'/PemesananKamar'}>Pesan Kamar</Link>
+                                <Link className='mr-3 text-primary font-semibold' href={'/rooms'}>Pesan Kamar</Link>
 
                                 {/* Menu KHUSUS ADMIN */}
                                 {isAdmin && (

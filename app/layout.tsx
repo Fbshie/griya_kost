@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,9 +28,15 @@ export default function RootLayout({
     <ClerkProvider>
     <html lang="en">
       <body
-     
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* --- SCRIPT MIDTRANS --- */}
+        <Script
+          src="https://app.sandbox.midtrans.com/snap/snap.js"
+          data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
+          strategy="beforeInteractive"
+        />
+        
         {children}
       </body>
     </html>
