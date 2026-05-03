@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import RoomGrid from '@/components/admin/RoomGrid';
+import DashboardStats from '@/components/admin/DashboardStats';
 
 type Kamar = {
   id: string;
@@ -66,6 +67,8 @@ export default async function AdminPage() {
           </p>
         </div>
       </div>
+
+      <DashboardStats/>
 
       {/* --- KOMPONEN ROOM GRID --- */}
       {rooms.length > 0 ? (

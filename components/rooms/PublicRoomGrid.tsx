@@ -3,22 +3,52 @@
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+// Pastikan path import ini sesuai dengan lokasi file action Anda
+import { checkUserActiveBooking } from "@/app/actions/manageRoomActions"; 
 
 export default function PublicRoomGrid({ rooms }: { rooms: any[] }) {
-  const { isSignedIn } = useAuth();
+  // Ambil userId dari Clerk
+  const { isSignedIn, userId } = useAuth(); 
   const router = useRouter();
+  
+  // State untuk mencegah klik ganda dan memberi feedback visual
+  const [loadingId, setLoadingId] = useState<string | null>(null); 
+
   const floors = Array.from(new Set(rooms.map((r) => r.floor))).sort();
 
-  const handleBooking = (room: any) => {
+  // Ubah fungsi menjadi async
+  const handleBooking = async (room: any) => {
     if (room.status !== 'available') return;
 
-    if (!isSignedIn) {
+    if (!isSignedIn || !userId) {
       // Jika belum login, arahkan ke login dulu
       router.push("/sign-in");
-    } else {
-      // Jika sudah login, arahkan ke halaman konfirmasi booking
-      router.push(`/rooms/book/${room.id}`);
+      return;
     }
+
+    // === MULAI KODE SATPAM PENCEGAH ===
+    setLoadingId(room.id); // Tampilkan status loading di tombol kamar yang diklik
+
+    try {
+      // Cek ke database apakah user ini sudah punya kamar aktif
+      const isAlreadyRenting = await checkUserActiveBooking(userId);
+
+      if (isAlreadyRenting) {
+        alert("Peringatan: Anda masih memiliki kamar yang berstatus Aktif!\n\nSatu akun hanya diperbolehkan menyewa satu kamar dalam satu waktu.");
+        router.push("/dashboard"); // Arahkan ke dashboard penyewa
+        return; // Hentikan eksekusi, jangan lanjut ke halaman konfirmasi!
+      }
+
+      // Jika aman, arahkan ke halaman konfirmasi booking
+      router.push(`/rooms/book/${room.id}`);
+
+    } catch (error) {
+      console.error("Gagal memeriksa status penyewa:", error);
+      alert("Terjadi kesalahan sistem. Silakan coba lagi.");
+    } finally {
+      setLoadingId(null); // Matikan status loading
+    }
+    // === AKHIR KODE SATPAM PENCEGAH ===
   };
 
   return (
@@ -35,11 +65,12 @@ export default function PublicRoomGrid({ rooms }: { rooms: any[] }) {
               <div 
                 key={kamar.id}
                 onClick={() => handleBooking(kamar)}
+                // Tambahkan disable klik jika sedang loading
                 className={`p-4 rounded-2xl border-2 transition-all cursor-pointer shadow-sm ${
                   kamar.status === 'available' 
-                  ? 'bg-white border-transparent hover:border-blue-500 hover:shadow-lg' 
+                  ? (loadingId === kamar.id ? 'bg-gray-50 border-blue-300' : 'bg-white border-transparent hover:border-blue-500 hover:shadow-lg') 
                   : 'bg-gray-100 border-gray-200 opacity-60 cursor-not-allowed'
-                }`}
+                } ${loadingId ? 'pointer-events-none' : ''}`}
               >
                 <div className="flex justify-between items-start mb-4">
                   <span className="text-2xl font-black text-gray-800">{kamar.room_number}</span>
@@ -53,8 +84,12 @@ export default function PublicRoomGrid({ rooms }: { rooms: any[] }) {
                 <p className="font-bold text-gray-900">Rp {kamar.price_per_month.toLocaleString('id-ID')}</p>
                 
                 {kamar.status === 'available' && (
-                  <button className="mt-4 w-full py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-colors">
-                    Pesan Sekarang
+                  <button 
+                    disabled={loadingId === kamar.id}
+                    className="mt-4 w-full py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-colors disabled:opacity-50 disabled:bg-gray-200 disabled:text-gray-500"
+                  >
+                    {/* Ubah teks jika sedang diproses */}
+                    {loadingId === kamar.id ? 'Mengecek...' : 'Pesan Sekarang'}
                   </button>
                 )}
               </div>

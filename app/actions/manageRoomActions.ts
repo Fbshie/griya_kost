@@ -13,7 +13,7 @@ export async function getRoomDetails(roomId: string) {
         id,
         start_date,
         users ( full_name, phone_number ),
-        invoices ( id, amount, status, due_date )
+        invoices ( id, amount, status, payment_proof, due_date )
       `)
       .eq('room_id', roomId)
       .eq('status', 'active')
@@ -71,5 +71,27 @@ export async function checkoutRoom(roomId: string, bookingId: string) {
     return { success: true }
   } catch (error) {
     return { success: false, error: "Gagal melakukan checkout" }
+  }
+}
+
+// 4. 
+export async function checkUserActiveBooking(userId: string) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('bookings')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .maybeSingle(); // Cari apakah ada 1 saja yang aktif
+
+    if (error) throw error;
+    
+    // Jika data ada, berarti return true (User nakal, sudah punya kamar!)
+    // Jika null, return false (User aman, boleh pesan)
+    return data ? true : false; 
+    
+  } catch (error) {
+    console.error("Gagal mengecek status user:", error);
+    return false; // Anggap aman jika terjadi error jaringan agar tidak stuck
   }
 }
