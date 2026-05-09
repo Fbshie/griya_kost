@@ -9,6 +9,7 @@ export async function createBookingForTenant(formData: FormData) {
   const amount = Number(formData.get('amount'));
   const fullName = formData.get('full_name') as string;
   const email = formData.get('email') as string;
+  const start_date = formData.get('start_date') as string;
   
   // Tangkap nomor WA dari form
   const phone = formData.get('phone_number') as string;
@@ -28,7 +29,7 @@ export async function createBookingForTenant(formData: FormData) {
     .insert({
       user_id: userId,
       room_id: roomId,
-      start_date: new Date().toISOString().split('T')[0],
+      start_date: start_date,
       status: 'active'
     })
     .select().single();

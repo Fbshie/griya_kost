@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import PublicRoomGrid from '@/components/rooms/PublicRoomGrid';
+import Navbar from '@/components/Navbar';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,12 +15,7 @@ export default async function PublicRoomsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b p-4 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-blue-600">Kost Griya Citra</h1>
-          <p className="text-sm text-gray-500 font-medium">Pilih kamar idaman Anda</p>
-        </div>
-      </nav>
+      <Navbar/>
 
       <main className="p-4 md:p-8 max-w-7xl mx-auto">
         <header className="mb-10 text-center">

@@ -3,12 +3,10 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { createBookingForTenant } from "@/app/actions/tenantActions";
 
-// Perhatikan penambahan async pada Props
 export default async function ConfirmBookingPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await currentUser();
   if (!user) redirect("/sign-in");
 
-  // AWAL PERBAIKAN: Await params untuk Next.js 15
   const { id } = await params;
 
   // Ambil data kamar
@@ -17,9 +15,6 @@ export default async function ConfirmBookingPage({ params }: { params: Promise<{
     .select('*')
     .eq('id', id)
     .single();
-
-  // DEBUG: Jika masih error, coba uncomment baris di bawah ini untuk melihat isi data
-  // console.log("Data Kamar ditemukan:", room);
 
   if (error || !room || room.status !== 'available') {
     return (
@@ -30,6 +25,11 @@ export default async function ConfirmBookingPage({ params }: { params: Promise<{
       </div>
     );
   }
+
+  // Dapatkan tanggal hari ini (WIB / UTC+7) untuk memblokir tanggal masa lalu
+  const now = new Date();
+  const todayWIB = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+  const minDate = todayWIB.toISOString().split('T')[0];
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -51,12 +51,26 @@ export default async function ConfirmBookingPage({ params }: { params: Promise<{
           </div>
         </div>
 
-        <form action={createBookingForTenant}>
+        <form action={createBookingForTenant} className="space-y-4">
           <input type="hidden" name="room_id" value={room.id} />
           <input type="hidden" name="user_id" value={user.id} />
           <input type="hidden" name="amount" value={room.price_per_month} />
           <input type="hidden" name="full_name" value={`${user.firstName} ${user.lastName}`} />
           <input type="hidden" name="email" value={user.emailAddresses[0].emailAddress} />
+
+          {/* INPUT BARU: TANGGAL MASUK */}
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Pilih Tanggal Masuk Kost</label>
+            <input
+              type="date"
+              name="start_date"
+              required
+              min={minDate} 
+              defaultValue={minDate} 
+              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+            <p className="text-xs text-gray-500 mt-1">Masa sewa dan tagihan bulanan akan dihitung mulai dari tanggal ini.</p>
+          </div>
 
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Nomor WhatsApp Aktif</label>
@@ -67,10 +81,10 @@ export default async function ConfirmBookingPage({ params }: { params: Promise<{
               placeholder="Contoh: 081234567890"
               className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             />
-            <p className="text-xs text-gray-500 mt-1">Nota lunas akan dikirimkan ke nomor ini.</p>
+            <p className="text-xs text-gray-500 mt-1">Nota lunas dan tagihan akan dikirimkan ke nomor ini.</p>
           </div>
 
-          <button type="submit" className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
+          <button type="submit" className="w-full bg-blue-600 text-white font-bold py-4 mt-4 rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
             Konfirmasi & Lanjut Pembayaran
           </button>
         </form>

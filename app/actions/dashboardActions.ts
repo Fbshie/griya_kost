@@ -22,12 +22,19 @@ export async function getDashboardStats() {
       .select('*', { count: 'exact', head: true })
       .eq('status', 'active');
 
-    // 2. Ambil data tagihan HANYA untuk bulan ini
+    // 2. Ambil data tagihan HANYA untuk bulan ini & dari penyewa aktif
     const { data: invoices } = await supabaseAdmin
       .from('invoices')
-      .select('amount, status')
+      .select(`
+        amount, 
+        status,
+        bookings!inner (
+          status
+        )
+      `)
       .gte('due_date', firstDayOfMonth)
-      .lte('due_date', lastDayOfMonth);
+      .lte('due_date', lastDayOfMonth)
+      .eq('bookings.status', 'active'); // Filter ini yang menyembunyikan tagihan dari penyewa yg sudah checkout
 
     let totalRevenue = 0;
     let totalUnpaid = 0;
@@ -39,7 +46,7 @@ export async function getDashboardStats() {
           totalRevenue += inv.amount;
         } else if (inv.status === 'unpaid') {
           totalUnpaid += inv.amount;
-          unpaidCount++;
+          unpaidCount++; // Sekarang ini hanya akan menghitung kamar yang benar-benar aktif
         }
       });
     }

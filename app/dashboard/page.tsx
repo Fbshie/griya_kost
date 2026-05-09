@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import PaymentCard from '@/components/user/PaymentCard';
+import Navbar from '@/components/Navbar';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,7 @@ const { data: booking, error } = await supabaseAdmin
   // Jika memang tidak ada booking aktif
   if (!booking) {
     return (
+      
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 text-center">
         <div className="bg-white p-10 rounded-3xl shadow-sm border max-w-md w-full">
           <div className="text-5xl mb-4">🏠</div>
