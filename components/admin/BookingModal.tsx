@@ -29,6 +29,11 @@ export default function BookingModal({ isOpen, onClose, room }: any) {
     }
   }
 
+  // 1. Ambil harga dari tabel relasi kelas
+  // Kita gunakan || 0 sebagai antisipasi jika kamar belum memiliki kelas
+  const roomPrice = room.room_classes?.price || 0;
+  const roomClassName = room.room_classes?.name || "Belum ada kelas";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
@@ -36,6 +41,8 @@ export default function BookingModal({ isOpen, onClose, room }: any) {
           <div>
             <h2 className="text-xl font-bold text-gray-900">Booking Kamar {room.room_number}</h2>
             <p className="text-sm text-gray-500">Lantai {room.floor} • Kost Griya Citra</p>
+            {/* Tambahan: Menampilkan Nama Kelas */}
+            <p className="text-xs font-bold text-blue-600 mt-1">{roomClassName}</p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
         </div>
@@ -44,10 +51,10 @@ export default function BookingModal({ isOpen, onClose, room }: any) {
           {/* Hidden Fields untuk Server Action */}
           <input type="hidden" name="room_id" value={room.id} />
           <input type="hidden" name="room_number" value={room.room_number} />
-          <input type="hidden" name="amount" value={room.price_per_month} />
+          {/* 2. Update value amount dengan harga dari relasi kelas */}
+          <input type="hidden" name="amount" value={roomPrice} />
 
-          
-          {/* ID sementara untuk penyewa (misal manual_hp) */}
+          {/* ID sementara untuk penyewa */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase mb-1">ID Clerk Penyewa</label>
             <input
@@ -81,7 +88,8 @@ export default function BookingModal({ isOpen, onClose, room }: any) {
           <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-4">
             <div className="flex justify-between text-sm">
               <span className="text-blue-600">Total Tagihan Pertama:</span>
-              <span className="font-bold text-blue-700">Rp {room.price_per_month.toLocaleString('id-ID')}</span>
+              {/* 3. Update tampilan harga Rupiah */}
+              <span className="font-bold text-blue-700">Rp {roomPrice.toLocaleString('id-ID')}</span>
             </div>
           </div>
 

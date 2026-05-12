@@ -10,11 +10,15 @@ export async function GET(req: Request) {
   }
 
   try {
+    // 1. UPDATE KUERI: Dompleng data harga dari tabel room_classes
     const { data: activeBookings, error: bookingError } = await supabaseAdmin
       .from('bookings')
       .select(`
         id, room_id, user_id, start_date,
-        rooms ( room_number, price_per_month ),
+        rooms ( 
+          room_number, 
+          room_classes ( price ) 
+        ),
         users ( full_name, phone_number )
       `)
       .eq('status', 'active');
@@ -26,7 +30,8 @@ export async function GET(req: Request) {
     const currentYear = today.getFullYear();
     let processedCount = 0;
 
-    for (const booking of activeBookings) {
+    // Tambahkan 'as any[]' untuk mencegah error TypeScript karena struktur bersarang
+    for (const booking of activeBookings as any[]) {
       const startDate = new Date(booking.start_date);
       const billDay = startDate.getDate(); // Ambil tanggal masuknya (misal: 15)
 
@@ -57,7 +62,8 @@ export async function GET(req: Request) {
           .maybeSingle();
 
         if (!existingInvoice) {
-          const amount = booking.rooms.price_per_month;
+          // 2. UPDATE VARIABEL: Ambil nominal harga dari relasi kelas
+          const amount = booking.rooms?.room_classes?.price || 0;
           const formattedDueDate = dueDateThisMonth.toISOString().split('T')[0];
 
           // 5. Buat Invoice

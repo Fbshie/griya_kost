@@ -8,7 +8,13 @@ export default async function PublicRoomsPage() {
   // Ambil semua data kamar dari database
   const { data: rooms, error } = await supabaseAdmin
     .from('rooms')
-    .select('*')
+.select(`
+    *,
+    room_classes (
+      name,
+      price
+    )
+    `)
     .order('room_number', { ascending: true });
 
   if (error) return <div className="p-8">Gagal memuat data kamar.</div>;

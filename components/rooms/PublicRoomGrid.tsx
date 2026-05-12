@@ -61,39 +61,52 @@ export default function PublicRoomGrid({ rooms }: { rooms: any[] }) {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {rooms.filter(r => r.floor === floor).map((kamar) => (
-              <div 
-                key={kamar.id}
-                onClick={() => handleBooking(kamar)}
-                // Tambahkan disable klik jika sedang loading
-                className={`p-4 rounded-2xl border-2 transition-all cursor-pointer shadow-sm ${
-                  kamar.status === 'available' 
-                  ? (loadingId === kamar.id ? 'bg-gray-50 border-blue-300' : 'bg-white border-transparent hover:border-blue-500 hover:shadow-lg') 
-                  : 'bg-gray-100 border-gray-200 opacity-60 cursor-not-allowed'
-                } ${loadingId ? 'pointer-events-none' : ''}`}
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <span className="text-2xl font-black text-gray-800">{kamar.room_number}</span>
-                  {kamar.status === 'available' ? (
-                    <span className="bg-green-500 w-3 h-3 rounded-full animate-pulse"></span>
-                  ) : (
-                    <span className="text-[10px] font-bold text-gray-400 uppercase">Terisi</span>
-                  )}
+            {rooms.filter(r => r.floor === floor).map((kamar) => {
+              // AMBIL HARGA DAN NAMA KELAS DARI RELASI DATABASE
+              const roomPrice = kamar.room_classes?.price || 0;
+              const roomClassName = kamar.room_classes?.name || "Belum ada kelas";
+
+              return (
+                <div 
+                  key={kamar.id}
+                  onClick={() => handleBooking(kamar)}
+                  // Tambahkan disable klik jika sedang loading
+                  className={`p-4 rounded-2xl border-2 transition-all cursor-pointer shadow-sm flex flex-col justify-between ${
+                    kamar.status === 'available' 
+                    ? (loadingId === kamar.id ? 'bg-gray-50 border-blue-300' : 'bg-white border-transparent hover:border-blue-500 hover:shadow-lg') 
+                    : 'bg-gray-100 border-gray-200 opacity-60 cursor-not-allowed'
+                  } ${loadingId ? 'pointer-events-none' : ''}`}
+                >
+                  <div>
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-2xl font-black text-gray-800">{kamar.room_number}</span>
+                      {kamar.status === 'available' ? (
+                        <span className="bg-green-500 w-3 h-3 rounded-full animate-pulse"></span>
+                      ) : (
+                        <span className="text-[10px] font-bold text-gray-400 uppercase">Terisi</span>
+                      )}
+                    </div>
+                    {/* Tampilkan Nama Kelas */}
+                    <p className="text-xs font-bold text-blue-600 mb-2">{roomClassName}</p>
+                    <p className="text-sm text-gray-500">Harga per bulan:</p>
+                  </div>
+                  
+                  <div>
+                    {/* Tampilkan Harga yang sudah di-update */}
+                    <p className="font-bold text-gray-900 mt-1">Rp {roomPrice.toLocaleString('id-ID')}</p>
+                    
+                    {kamar.status === 'available' && (
+                      <button 
+                        disabled={loadingId === kamar.id}
+                        className="mt-4 w-full py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-colors disabled:opacity-50 disabled:bg-gray-200 disabled:text-gray-500"
+                      >
+                        {loadingId === kamar.id ? 'Mengecek...' : 'Pesan Sekarang'}
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <p className="text-sm text-gray-500">Harga per bulan:</p>
-                <p className="font-bold text-gray-900">Rp {kamar.price_per_month.toLocaleString('id-ID')}</p>
-                
-                {kamar.status === 'available' && (
-                  <button 
-                    disabled={loadingId === kamar.id}
-                    className="mt-4 w-full py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-colors disabled:opacity-50 disabled:bg-gray-200 disabled:text-gray-500"
-                  >
-                    {/* Ubah teks jika sedang diproses */}
-                    {loadingId === kamar.id ? 'Mengecek...' : 'Pesan Sekarang'}
-                  </button>
-                )}
-              </div>
-            ))}
+              )
+            })}
           </div>
         </section>
       ))}

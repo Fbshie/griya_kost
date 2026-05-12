@@ -9,10 +9,10 @@ export default async function ConfirmBookingPage({ params }: { params: Promise<{
 
   const { id } = await params;
 
-  // Ambil data kamar
+  // 1. UPDATE KUERI SUPABASE: Ambil data kamar beserta kelasnya
   const { data: room, error } = await supabaseAdmin
     .from('rooms')
-    .select('*')
+    .select('*, room_classes(name, price)') 
     .eq('id', id)
     .single();
 
@@ -26,6 +26,10 @@ export default async function ConfirmBookingPage({ params }: { params: Promise<{
     );
   }
 
+  // 2. TENTUKAN HARGA DAN NAMA KELAS
+  const roomPrice = room.room_classes?.price || 0;
+  const roomClassName = room.room_classes?.name || "Belum ada kelas";
+
   // Dapatkan tanggal hari ini (WIB / UTC+7) untuk memblokir tanggal masa lalu
   const now = new Date();
   const todayWIB = new Date(now.getTime() + 7 * 60 * 60 * 1000);
@@ -37,9 +41,13 @@ export default async function ConfirmBookingPage({ params }: { params: Promise<{
         <h1 className="text-2xl font-bold mb-6">Konfirmasi Pesanan</h1>
 
         <div className="space-y-4 mb-8">
-          <div className="flex justify-between py-2 border-b">
+          <div className="flex justify-between py-2 border-b items-center">
             <span className="text-gray-500">Kamar</span>
-            <span className="font-bold">{room.room_number} (Lantai {room.floor})</span>
+            <div className="text-right">
+              <span className="font-bold block">{room.room_number} (Lantai {room.floor})</span>
+              {/* Tambahan: Menampilkan Nama Kelas */}
+              <span className="text-xs text-blue-600 font-bold block mt-1">{roomClassName}</span>
+            </div>
           </div>
           <div className="flex justify-between py-2 border-b">
             <span className="text-gray-500">Nama Penyewa</span>
@@ -47,14 +55,16 @@ export default async function ConfirmBookingPage({ params }: { params: Promise<{
           </div>
           <div className="flex justify-between py-2 border-b">
             <span className="text-gray-500">Harga per Bulan</span>
-            <span className="font-bold text-blue-600">Rp {room.price_per_month.toLocaleString('id-ID')}</span>
+            {/* 3. UPDATE TAMPILAN HARGA */}
+            <span className="font-bold text-blue-600">Rp {roomPrice.toLocaleString('id-ID')}</span>
           </div>
         </div>
 
         <form action={createBookingForTenant} className="space-y-4">
           <input type="hidden" name="room_id" value={room.id} />
           <input type="hidden" name="user_id" value={user.id} />
-          <input type="hidden" name="amount" value={room.price_per_month} />
+          {/* 4. UPDATE VALUE AMOUNT UNTUK PAYMENT GATEWAY */}
+          <input type="hidden" name="amount" value={roomPrice} />
           <input type="hidden" name="full_name" value={`${user.firstName} ${user.lastName}`} />
           <input type="hidden" name="email" value={user.emailAddresses[0].emailAddress} />
 

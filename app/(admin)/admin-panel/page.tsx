@@ -4,12 +4,16 @@ import { redirect } from 'next/navigation'
 import RoomGrid from '@/components/admin/RoomGrid';
 import DashboardStats from '@/components/admin/DashboardStats';
 
+// 1. PERBAIKAN TIPE DATA (Sesuai dengan yang ada di RoomGrid.tsx)
 type Kamar = {
   id: string;
   room_number: string;
   floor: number;
-  price_per_month: number;
   status: 'available' | 'occupied' | 'maintenance';
+  room_classes: {
+    name: string;
+    price: number;
+  } | null;
 };
 
 export const dynamic = 'force-dynamic'
@@ -23,10 +27,19 @@ export default async function AdminPage() {
     return redirect('/');
   }
 
-  // Ambil data 45 kamar dari tabel 'rooms'
+  // 2. PERBAIKAN KUERI SUPABASE (Mengambil data relasi dari room_classes)
   const { data: rawData, error } = await supabaseAdmin
     .from('rooms')
-    .select('*')
+    .select(`
+      id,
+      room_number,
+      floor,
+      status,
+      room_classes (
+        name,
+        price
+      )
+    `)
     .order('room_number', { ascending: true });
 
   if (error) {
@@ -36,10 +49,12 @@ export default async function AdminPage() {
       </div>
     );
   }
-  const rooms = rawData as Kamar[];
+  
+  // Karena kita sudah mendefinisikan kuerinya dengan tepat, kita bisa langsung menggunakan as Kamar[]
+  const rooms = rawData as unknown as Kamar[];
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto">
+    <div className="md:p-8 max-w-7xl mx-auto">
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Manajemen Kamar</h1>
         <p className="text-gray-500">Total {rooms.length} Kamar di Kost Griya Citra</p>
