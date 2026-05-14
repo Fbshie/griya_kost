@@ -74,7 +74,7 @@ export async function checkoutRoom(roomId: string, bookingId: string) {
   }
 }
 
-// 4. 
+
 export async function checkUserActiveBooking(userId: string) {
   try {
     const { data, error } = await supabaseAdmin
@@ -93,5 +93,35 @@ export async function checkUserActiveBooking(userId: string) {
   } catch (error) {
     console.error("Gagal mengecek status user:", error);
     return false; // Anggap aman jika terjadi error jaringan agar tidak stuck
+  }
+}
+
+// 5. Mengubah status kamar menjadi Perbaikan (Maintenance)
+export async function setRoomMaintenance(roomId: string) {
+  try {
+    await supabaseAdmin
+      .from('rooms')
+      .update({ status: 'maintenance' })
+      .eq('id', roomId);
+
+    revalidatePath('/admin-panel');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: "Gagal mengubah status ke perbaikan" };
+  }
+}
+
+// 6. Mengubah status kamar kembali menjadi Tersedia (Available)
+export async function setRoomAvailable(roomId: string) {
+  try {
+    await supabaseAdmin
+      .from('rooms')
+      .update({ status: 'available' })
+      .eq('id', roomId);
+
+    revalidatePath('/admin-panel');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: "Gagal mengubah status kamar" };
   }
 }

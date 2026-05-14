@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { currentUser } from '@clerk/nextjs/server'
 import Navbar from '@/components/admin/Navbar';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 
 export default async function AdminLayout({
   children,
@@ -18,8 +19,8 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 relative">
       
-      <div className="md:pl-72 flex flex-col min-h-screen transition-all duration-300">
-        
+      {/* <div className="md:pl-72 flex flex-col min-h-screen transition-all duration-300">
+        <AdminSidebar /> */}
       
         <Navbar />
         
@@ -30,6 +31,6 @@ export default async function AdminLayout({
 
       </div>
       
-    </div>
+    //  </div>
   )
 }

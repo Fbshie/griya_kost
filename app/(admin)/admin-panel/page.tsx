@@ -2,7 +2,6 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import RoomGrid from '@/components/admin/RoomGrid';
-import DashboardStats from '@/components/admin/DashboardStats';
 
 // 1. PERBAIKAN TIPE DATA (Sesuai dengan yang ada di RoomGrid.tsx)
 type Kamar = {
@@ -50,7 +49,7 @@ export default async function AdminPage() {
     );
   }
   
-  // Karena kita sudah mendefinisikan kuerinya dengan tepat, kita bisa langsung menggunakan as Kamar[]
+
   const rooms = rawData as unknown as Kamar[];
 
   return (
@@ -83,7 +82,7 @@ export default async function AdminPage() {
         </div>
       </div>
 
-      <DashboardStats/>
+      
 
       {/* --- KOMPONEN ROOM GRID --- */}
       {rooms.length > 0 ? (

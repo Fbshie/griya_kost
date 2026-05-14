@@ -11,10 +11,9 @@ const Header = () => {
 
   // Daftar Menu Admin
   const adminLinks = [
-    { name: 'Home', href: '/' },
     { name: 'Manajemen Kamar', href: '/admin-panel' },
     // { name: 'Kelola Kamar', href: '/admin-panel/rooms' },
-    { name: 'Tagihan', href: '/admin-panel/invoices' },
+    { name: 'Tagihan', href: '/admin-panel/tagihan' },
     { name: 'Laporan Keluhan', href: '/admin-panel/complaints' },
   ];
 
@@ -47,7 +46,7 @@ const Header = () => {
         {/* Bagian Kanan: Profil & Tombol Hamburger */}
         <div className="flex items-center gap-4">
           <Link href={"/"} className="hidden sm:block text-sm font-semibold text-gray-500 hover:text-blue-600 transition-colors">
-            Lihat Web Publik
+            Kembali ke Web Publik
           </Link>
           
           <div className="hidden sm:block border-l h-6 border-gray-300"></div>

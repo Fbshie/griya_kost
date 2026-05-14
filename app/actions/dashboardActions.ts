@@ -1,52 +1,61 @@
-'use server'
+"use server";
 
 import { supabaseAdmin } from "@/lib/supabase";
 
 export async function getDashboardStats() {
   try {
-    const today = new Date();
-    const currentMonth = today.getMonth() + 1;
-    const currentYear = today.getFullYear();
+    // 1. Ambil data kamar untuk hitung okupansi
+    const { data: rooms } = await supabaseAdmin.from("rooms").select("status");
+    const totalRooms = rooms?.length || 0;
+    const occupiedRooms = rooms?.filter((r) => r.status === "occupied").length || 0;
 
-    // Batas tanggal bulan ini untuk filter tagihan
-    const firstDayOfMonth = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
-    const lastDayOfMonth = `${currentYear}-${String(currentMonth).padStart(2, '0')}-31`;
+    // 2. Ambil semua Invoices beserta relasi user dan kamar
+    // HANYA ambil tagihan untuk bulan ini (atau yang belum lunas)
+    const currentMonth = new Date().getMonth() + 1;
+    const currentYear = new Date().getFullYear();
+    const firstDay = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
+    const lastDay = `${currentYear}-${String(currentMonth).padStart(2, '0')}-31`;
 
-    // 1. Hitung total kamar & kamar yang sedang disewa
-    const { count: totalRooms } = await supabaseAdmin
-      .from('rooms')
-      .select('*', { count: 'exact', head: true });
-
-    const { count: occupiedRooms } = await supabaseAdmin
-      .from('bookings')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'active');
-
-    // 2. Ambil data tagihan HANYA untuk bulan ini & dari penyewa aktif
     const { data: invoices } = await supabaseAdmin
-      .from('invoices')
+      .from("invoices")
       .select(`
-        amount, 
-        status,
-        bookings!inner (
-          status
+        id, amount, status, due_date, payment_proof, payment_method,
+        bookings (
+          status,
+          users ( full_name, phone_number ),
+          rooms ( room_number )
         )
       `)
-      .gte('due_date', firstDayOfMonth)
-      .lte('due_date', lastDayOfMonth)
-      .eq('bookings.status', 'active'); // Filter ini yang menyembunyikan tagihan dari penyewa yg sudah checkout
+      .or(`status.eq.unpaid,and(due_date.gte.${firstDay},due_date.lte.${lastDay})`);
 
+    // 3. Hitung Statistik Keuangan
     let totalRevenue = 0;
     let totalUnpaid = 0;
     let unpaidCount = 0;
+    const detailedList: any[] = []; // Array untuk menampung data tabel
 
     if (invoices) {
-      invoices.forEach(inv => {
-        if (inv.status === 'paid') {
-          totalRevenue += inv.amount;
-        } else if (inv.status === 'unpaid') {
-          totalUnpaid += inv.amount;
-          unpaidCount++; // Sekarang ini hanya akan menghitung kamar yang benar-benar aktif
+      invoices.forEach((inv) => {
+        // Hanya proses invoice dari penyewa yang masih aktif
+        if (inv.bookings?.status === 'active') {
+          if (inv.status === "paid") {
+            totalRevenue += inv.amount;
+          } else if (inv.status === "unpaid") {
+            totalUnpaid += inv.amount;
+            unpaidCount++;
+          }
+
+          // Masukkan ke daftar detail untuk tabel
+          detailedList.push({
+            id: inv.id,
+            userName: inv.bookings.users?.full_name || "Penyewa",
+            roomNumber: inv.bookings.rooms?.room_number || "-",
+            amount: inv.amount,
+            status: inv.status,
+            dueDate: inv.due_date,
+            proofUrl: inv.payment_proof,
+            paymentMethod: inv.payment_method
+          });
         }
       });
     }
@@ -54,16 +63,15 @@ export async function getDashboardStats() {
     return {
       success: true,
       data: {
-        totalRooms: totalRooms || 0,
-        occupiedRooms: occupiedRooms || 0,
-        availableRooms: (totalRooms || 0) - (occupiedRooms || 0),
+        totalRooms,
+        occupiedRooms,
         totalRevenue,
         totalUnpaid,
-        unpaidCount
-      }
+        unpaidCount,
+        detailedList // Mengirim daftar detail ke UI
+      },
     };
-  } catch (error) {
-    console.error("Gagal mengambil data dashboard:", error);
-    return { success: false, error: "Gagal memuat analitik" };
+  } catch (error: any) {
+    return { success: false, error: error.message };
   }
 }

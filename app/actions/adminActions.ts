@@ -10,7 +10,7 @@ export async function markAsPaidManual(formData: FormData) {
   
   let proofUrl = null;
 
-// 1. Ambil data penyewa terlebih dahulu untuk dikirimkan WA nanti
+  // 1. Ambil data penyewa terlebih dahulu untuk dikirimkan WA nanti
   const { data: invoiceData, error: fetchError } = await supabaseAdmin
     .from('invoices')
     .select(`
@@ -31,8 +31,9 @@ export async function markAsPaidManual(formData: FormData) {
     const fileExt = file.name.split('.').pop();
     const fileName = `${invoiceId}-${Date.now()}.${fileExt}`;
 
+    // DISESUAIKAN: Menggunakan nama bucket yang sama yaitu 'bukti_bayar'
     const { error: uploadError } = await supabaseAdmin.storage
-      .from('receipts')
+      .from('bukti_bayar')
       .upload(fileName, file);
 
     if (uploadError) {
@@ -41,7 +42,7 @@ export async function markAsPaidManual(formData: FormData) {
     }
 
     const { data: publicUrlData } = supabaseAdmin.storage
-      .from('receipts')
+      .from('bukti_bayar')
       .getPublicUrl(fileName);
       
     proofUrl = publicUrlData.publicUrl;
@@ -53,7 +54,8 @@ export async function markAsPaidManual(formData: FormData) {
     .update({ 
       status: 'paid', 
       payment_date: new Date().toISOString(),
-      payment_proof: proofUrl
+      payment_proof: proofUrl,
+      payment_method: 'Offline / Transfer Manual' // <--- INI DIA BARIS SAKTINYA!
     })
     .eq('id', invoiceId);
 
