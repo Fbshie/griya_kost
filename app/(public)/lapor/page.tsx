@@ -5,8 +5,6 @@ import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { submitComplaint } from "@/app/actions/complaintActions";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 
 export default function LaporKeluhanPage() {
   const { isLoaded, isSignedIn } = useAuth();
@@ -42,7 +40,7 @@ export default function LaporKeluhanPage() {
 
   return (
     <>
-    <Navbar />
+    
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
         
@@ -119,7 +117,7 @@ export default function LaporKeluhanPage() {
 
       </div>
     </div>
-    <Footer />
+    
     </>
   );
 }

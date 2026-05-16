@@ -35,27 +35,23 @@ export default async function ConfirmBookingPage({ params }: { params: Promise<{
   const todayWIB = new Date(now.getTime() + 7 * 60 * 60 * 1000);
   const minDate = todayWIB.toISOString().split('T')[0];
 
+  // Variabel defaultName dari Clerk dihapus agar kolom benar-benar kosong dari awal
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full border">
         <h1 className="text-2xl font-bold mb-6">Konfirmasi Pesanan</h1>
 
-        <div className="space-y-4 mb-8">
+        <div className="space-y-4 mb-6">
           <div className="flex justify-between py-2 border-b items-center">
             <span className="text-gray-500">Kamar</span>
             <div className="text-right">
               <span className="font-bold block">{room.room_number} (Lantai {room.floor})</span>
-              {/* Tambahan: Menampilkan Nama Kelas */}
               <span className="text-xs text-blue-600 font-bold block mt-1">{roomClassName}</span>
             </div>
           </div>
           <div className="flex justify-between py-2 border-b">
-            <span className="text-gray-500">Nama Penyewa</span>
-            <span className="font-bold">{user.firstName} {user.lastName}</span>
-          </div>
-          <div className="flex justify-between py-2 border-b">
             <span className="text-gray-500">Harga per Bulan</span>
-            {/* 3. UPDATE TAMPILAN HARGA */}
             <span className="font-bold text-blue-600">Rp {roomPrice.toLocaleString('id-ID')}</span>
           </div>
         </div>
@@ -63,12 +59,23 @@ export default async function ConfirmBookingPage({ params }: { params: Promise<{
         <form action={createBookingForTenant} className="space-y-4">
           <input type="hidden" name="room_id" value={room.id} />
           <input type="hidden" name="user_id" value={user.id} />
-          {/* 4. UPDATE VALUE AMOUNT UNTUK PAYMENT GATEWAY */}
           <input type="hidden" name="amount" value={roomPrice} />
-          <input type="hidden" name="full_name" value={`${user.firstName} ${user.lastName}`} />
           <input type="hidden" name="email" value={user.emailAddresses[0].emailAddress} />
 
-          {/* INPUT BARU: TANGGAL MASUK */}
+          {/* INPUT: NAMA LENGKAP KOSONG & HANYA PLACEHOLDER */}
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Nama Lengkap (Sesuai KTP)</label>
+            <input
+              type="text"
+              name="full_name"
+              required
+              placeholder="Isi nama lengkap anda.."
+              className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+            <p className="text-xs text-gray-500 mt-1">Nama ini akan digunakan untuk data administrasi dan tagihan.</p>
+          </div>
+
+          {/* INPUT: TANGGAL MASUK */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Pilih Tanggal Masuk Kost</label>
             <input
@@ -82,19 +89,20 @@ export default async function ConfirmBookingPage({ params }: { params: Promise<{
             <p className="text-xs text-gray-500 mt-1">Masa sewa dan tagihan bulanan akan dihitung mulai dari tanggal ini.</p>
           </div>
 
+          {/* INPUT: NOMOR WA */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Nomor WhatsApp Aktif</label>
             <input
               type="text"
               name="phone_number"
               required
-              placeholder="Contoh: 081234567890"
+              placeholder="Contoh: 08*******"
               className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
             />
             <p className="text-xs text-gray-500 mt-1">Nota lunas dan tagihan akan dikirimkan ke nomor ini.</p>
           </div>
 
-          <button type="submit" className="w-full bg-blue-600 text-white font-bold py-4 mt-4 rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
+          <button type="submit" className="w-full bg-blue-600 text-white font-bold py-4 mt-6 rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
             Konfirmasi & Lanjut Pembayaran
           </button>
         </form>

@@ -53,7 +53,7 @@ export async function submitComplaint(formData: FormData) {
     }
 
     // 3. KIRIM NOTIFIKASI WHATSAPP KE ADMIN (Menggunakan Fonnte API)
-    const adminPhone = "089504100165"; // <-- GANTI DENGAN NOMOR WA ADMIN (Awali dengan 08 / 62)
+    const adminPhone = process.env.NEXT_PUBLIC_ADMIN_PHONE || ""; // <-- GANTI DENGAN NOMOR WA ADMIN (Awali dengan 08 / 62)
     const waToken = process.env.FONNTE_TOKEN || ""; 
 
     const waMessage = `*🚨 LAPORAN KELUHAN BARU 🚨*\n\n*Kamar:* ${roomNumber}\n*Kategori:* ${title}\n*Detail:* ${description}\n\nMohon segera cek Dasbor Admin untuk menindaklanjuti.`;
