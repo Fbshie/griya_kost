@@ -81,12 +81,12 @@ export async function checkUserActiveBooking(userId: string) {
       .from('bookings')
       .select('id')
       .eq('user_id', userId)
-      .eq('status', 'active')
-      .maybeSingle(); // Cari apakah ada 1 saja yang aktif
+      .in('status', ['active', 'pending']) 
+      .maybeSingle(); // Cari apakah ada 1 saja yang aktif atau tertunda
 
     if (error) throw error;
     
-    // Jika data ada, berarti return true (User nakal, sudah punya kamar!)
+    // Jika data ada, berarti return true (User sudah punya kamar/tagihan!)
     // Jika null, return false (User aman, boleh pesan)
     return data ? true : false; 
     

@@ -48,8 +48,8 @@ export default function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/lapor" className="text-gray-600 hover:text-blue-600 font-medium transition-colors flex items-center gap-2">
-                                    <span className="text-blue-500 text-lg">▹</span> Laporkan Keluhan
+                                <Link href="/lokasi" className="text-gray-600 hover:text-blue-600 font-medium transition-colors flex items-center gap-2">
+                                    <span className="text-blue-500 text-lg">▹</span> Lokasi
                                 </Link>
                             </li>
                         </ul>

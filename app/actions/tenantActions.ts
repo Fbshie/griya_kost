@@ -2,6 +2,7 @@
 
 import { supabaseAdmin } from "@/lib/supabase"
 import { redirect } from "next/navigation"
+import { sendWhatsApp } from "@/lib/fonnte"
 
 export async function createBookingForTenant(formData: FormData) {
   const roomId = formData.get('room_id') as string;
@@ -50,3 +51,22 @@ export async function createBookingForTenant(formData: FormData) {
   // 5. Lempar ke Dashboard
   redirect('/dashboard');
 }
+
+export async function requestCheckoutNotification(tenantName: string, roomNumber: string) {
+  try {
+    const adminPhone = process.env.NEXT_PUBLIC_ADMIN_PHONE;
+    if (!adminPhone) {
+      return { success: false, error: "Nomor Admin tidak ditemukan di sistem." };
+    }
+
+    const pesan = `🚨 *PERMOHONAN PINDAH / CHECKOUT* 🚨\n\nHalo Admin, penyewa atas nama *${tenantName}* di *Kamar ${roomNumber}* baru saja menekan tombol pengajuan keluar dari kost melalui Dashboard.\n\nMohon segera hubungi penyewa yang bersangkutan untuk proses serah terima kunci dan pengecekan kondisi kamar. 🏢`;
+    
+    await sendWhatsApp(adminPhone, pesan);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Gagal mengirim WA Checkout:", error);
+    return { success: false, error: "Gagal mengirim permohonan ke Admin." };
+  }
+}
+

@@ -20,34 +20,13 @@ export default async function HomePage() {
     displayClasses[1] = temp;
   }
 
-  // Data Galeri Foto Kost Statis
-  const galeriKost = [
-    {
-      src: "/depan.jpeg",
-      judul: "Tampak Depan Kost",
-      deskripsi: "Bangunan modern dengan desain minimalis dan sirkulasi udara yang sangat baik untuk kenyamanan penghuni."
-    },
-    {
-      src: "/parkir.jpeg",
-      judul: "Area Parkir Kendaraan",
-      deskripsi: "Parkiran luas yang muat untuk banyak motor dan mobil, diawasi CCTV 24 jam penuh."
-    },
-    {
-      src: "/lorong.jpeg",
-      judul: "Lorong Kamar",
-      deskripsi: "Lorong yang bersih, tenang, dan terang dengan pencahayaan maksimal di siang maupun malam hari."
-    },
-    {
-      src: "/dapur.jpeg",
-      judul: "Dapur Bersama",
-      deskripsi: "Fasilitas dapur kompor gas dan wastafel cuci piring yang bisa digunakan bersama dengan rapi."
-    },
-    {
-      src: "/jemuran.jpeg",
-      judul: "Area Jemuran",
-      deskripsi: "Tempat menjemur pakaian yang luas dan tertutup kanopi transparan agar aman dari hujan."
-    }
-  ];
+  // 3. AMBIL DATA GALERI DARI DATABASE
+  const { data: rawGalleries } = await supabaseAdmin
+    .from('galleries')
+    .select('*')
+    .order('created_at', { ascending: true }); // Mengurutkan dari foto yang paling awal diupload
+  
+  const galeriKost = rawGalleries || [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -88,7 +67,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 2. GALERI KOST (Menggunakan Native CSS Scroll) */}
+      {/* 2. GALERI KOST (Dinamis dari Database) */}
       <section id="galeri" className="py-12 bg-white border-t border-gray-100 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           
@@ -106,24 +85,30 @@ export default async function HomePage() {
           </div>
 
           <div className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory scroll-smooth">
-            {galeriKost.map((item, index) => (
-              <div key={index} className="snap-center shrink-0 w-[80vw] md:w-[350px] bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col">
-                <div className="relative h-64 w-full bg-gray-100 overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img 
-                    src={item.src} 
-                    alt={item.judul} 
-                    className="object-cover w-full h-full hover:scale-110 transition-transform duration-700"
-                  />
+            {galeriKost.length > 0 ? (
+              galeriKost.map((item, index) => (
+                <div key={item.id || index} className="snap-center shrink-0 w-[80vw] md:w-[350px] bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all flex flex-col">
+                  <div className="relative h-64 w-full bg-gray-100 overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={item.image_url} 
+                      alt={item.title} 
+                      className="object-cover w-full h-full hover:scale-110 transition-transform duration-700"
+                    />
+                  </div>
+                  <div className="p-6 flex-1 flex flex-col bg-white">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
-                <div className="p-6 flex-1 flex flex-col bg-white">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{item.judul}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">
-                    {item.deskripsi}
-                  </p>
-                </div>
+              ))
+            ) : (
+              <div className="w-full text-center py-10 text-gray-500">
+                Belum ada foto galeri yang diunggah.
               </div>
-            ))}
+            )}
           </div>
           
           <div className="flex justify-center md:hidden mt-2 text-gray-400 text-sm items-center gap-2">
@@ -164,7 +149,7 @@ export default async function HomePage() {
                 >
                   {/* Badge Terpopuler Khusus Kartu Tengah */}
                   {isCenterCard && (
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-linear-to-r from-orange-400 to-yellow-400 text-white px-4 py-1 rounded-full text-xs font-black tracking-widest uppercase shadow-lg">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-orange-400 to-yellow-400 text-white px-4 py-1 rounded-full text-xs font-black tracking-widest uppercase shadow-lg">
                       Terpopuler
                     </div>
                   )}

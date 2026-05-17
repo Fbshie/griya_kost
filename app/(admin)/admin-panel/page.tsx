@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import RoomGrid from '@/components/admin/RoomGrid';
+import AddGalleryForm from '@/components/admin/AddGalleryForm';
 
 // 1. PERBAIKAN TIPE DATA (Sesuai dengan yang ada di RoomGrid.tsx)
 type Kamar = {
@@ -82,7 +83,6 @@ export default async function AdminPage() {
         </div>
       </div>
 
-      
 
       {/* --- KOMPONEN ROOM GRID --- */}
       {rooms.length > 0 ? (

@@ -2,44 +2,42 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import PaymentCard from '@/components/user/PaymentCard';
-import Navbar from '@/components/Navbar';
+import TenantQuickActions from '@/components/user/TenantQuickActions';
 
 export const dynamic = 'force-dynamic';
 
 export default async function TenantDashboard() {
-  // 1. Dapatkan user yang sedang login via Clerk
   const user = await currentUser();
   
   if (!user) {
     return redirect('/sign-in');
   }
 
-  // 2. Cari data booking yang aktif milik user ini
-const { data: booking, error } = await supabaseAdmin
+  // 1. CARI DATA BOOKING (Tambahkan 'users ( full_name )' ke dalam select)
+  const { data: booking, error } = await supabaseAdmin
     .from('bookings')
     .select(`
       id,
       status,
+      users ( full_name ), 
       rooms ( room_number, floor ),
       invoices ( id, amount, status, due_date )
     `)
     .eq('user_id', user.id)
-    .eq('status', 'active')
-    .maybeSingle(); // <-- Ganti .single() jadi .maybeSingle()
+    .in('status', ['active', 'pending'])
+    .maybeSingle();
 
-  // DEBUG: Jika Anda ingin melihat apa yang salah di terminal VS Code
   if (error) console.error("Dashboard Error:", error);
 
-  // Jika memang tidak ada booking aktif
+  // 2. JIKA BELUM PUNYA KAMAR
   if (!booking) {
     return (
-      
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 text-center">
+      <div className="min-h-[80vh] flex items-center justify-center bg-gray-50 p-4 text-center">
         <div className="bg-white p-10 rounded-3xl shadow-sm border max-w-md w-full">
-          <div className="text-5xl mb-4">🏠</div>
+          <div className="text-6xl mb-6">🏠</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Belum Ada Kamar Aktif</h1>
-          <p className="text-gray-500 mb-6">Sepertinya Anda belum memesan kamar atau masa sewa Anda sudah berakhir.</p>
-          <a href="/rooms" className="inline-block bg-blue-600 text-white px-6 py-3 rounded-xl font-bold">
+          <p className="text-gray-500 mb-8">Sepertinya Anda belum memesan kamar atau masa sewa Anda sudah berakhir.</p>
+          <a href="/rooms" className="inline-block bg-blue-600 hover:bg-blue-700 transition-colors text-white px-8 py-3.5 rounded-xl font-bold shadow-lg shadow-blue-200">
             Pesan Kamar Sekarang
           </a>
         </div>
@@ -47,26 +45,60 @@ const { data: booking, error } = await supabaseAdmin
     );
   }
 
-  // Filter hanya tagihan yang belum dibayar
-  const unpaidInvoices = booking.invoices.filter((inv: any) => inv.status === 'unpaid');
+  // 3. AMBIL NAMA LENGKAP DARI DATABASE (Jika kosong, baru pakai nama akun sebagai cadangan)
+  const tenantFullName = booking.users?.full_name || user.firstName || 'Penyewa';
+
+  const unpaidInvoices = booking.invoices?.filter((inv: any) => inv.status === 'unpaid') || [];
+  const roomNumber = booking.rooms?.room_number || '-';
 
   return (
-    <div className="p-4 md:p-8 max-w-3xl mx-auto">
-      <header className="mb-10 bg-blue-600 rounded-2xl p-6 md:p-10 text-white shadow-lg">
-        <h1 className="text-3xl font-bold mb-2">Halo, {user.firstName}! 👋</h1>
-        <p className="text-blue-100 text-lg">
-          Kamar Anda: <span className="font-bold text-white bg-blue-700 px-3 py-1 rounded-lg ml-2">{booking.rooms.room_number} (Lantai {booking.rooms.floor})</span>
-        </p>
+    <div className="p-4 md:p-8 max-w-4xl mx-auto min-h-screen">
+      
+      {/* HEADER PROFILE CARD */}
+      <header className="mb-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-3xl p-8 md:p-10 text-white shadow-xl relative overflow-hidden">
+        {/* Dekorasi Background */}
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
+        <div className="absolute bottom-0 right-20 w-24 h-24 bg-blue-400 opacity-20 rounded-full blur-xl"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <p className="text-blue-100 font-medium mb-1">Dashboard Penyewa</p>
+            {/* UBAH NAMA DI SINI MENGGUNAKAN VARIABEL BARU */}
+            <h1 className="text-3xl md:text-4xl font-black mb-2">Halo, {tenantFullName}! 👋</h1>
+            <p className="text-blue-50 max-w-md leading-relaxed">
+              Selamat datang di pusat kendali kost Anda. Cek tagihan dan manfaatkan layanan kami dengan mudah.
+            </p>
+          </div>
+          <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl p-5 text-center shrink-0">
+            <p className="text-blue-100 text-sm font-medium mb-1">Kamar Anda Saat Ini</p>
+            <p className="text-4xl font-black text-white">{roomNumber}</p>
+            <p className="text-xs text-blue-100 mt-1 bg-black/20 rounded-full py-1 px-3 inline-block">
+              Lantai {booking.rooms?.floor || '-'}
+            </p>
+          </div>
+        </div>
       </header>
 
-      <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Tagihan Anda</h2>
+      {/* QUICK ACTIONS SECTION */}
+      <div className="mb-10">
+        <h2 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+          <span>⚡</span> Menu Cepat
+        </h2>
+        {/* KIRIM NAMA LENGKAP KE KOMPONEN TOMBOL AGAR WA KE ADMIN JUGA PAKAI NAMA ASLI */}
+        <TenantQuickActions tenantName={tenantFullName} roomNumber={roomNumber} />
+      </div>
+
+      {/* INVOICE SECTION */}
+      <div className="mb-12">
+        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <span>🧾</span> Tagihan Anda
+        </h2>
         
         {unpaidInvoices.length === 0 ? (
-          <div className="bg-green-50 p-8 rounded-2xl border-2 border-green-200 text-center">
-            <div className="text-4xl mb-2">🎉</div>
-            <p className="text-green-800 font-bold text-lg">Hebat! Semua tagihan Anda sudah lunas.</p>
-            <p className="text-green-600 text-sm mt-1">Terima kasih telah membayar tepat waktu.</p>
+          <div className="bg-green-50 p-8 rounded-3xl border border-green-200 text-center shadow-sm">
+            <div className="text-5xl mb-4">🎉</div>
+            <p className="text-green-800 font-black text-xl mb-1">Semua Tagihan Lunas!</p>
+            <p className="text-green-600 text-sm">Terima kasih telah melakukan pembayaran tepat waktu. Anda bebas dari tunggakan bulan ini.</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -76,6 +108,7 @@ const { data: booking, error } = await supabaseAdmin
           </div>
         )}
       </div>
+
     </div>
   );
 }

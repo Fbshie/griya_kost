@@ -15,6 +15,7 @@ const Header = () => {
     // { name: 'Kelola Kamar', href: '/admin-panel/rooms' },
     { name: 'Tagihan', href: '/admin-panel/tagihan' },
     { name: 'Laporan Keluhan', href: '/admin-panel/complaints' },
+    { name: 'Manajemen Galeri', href: '/admin-panel/galeri' },
   ];
 
   return (
