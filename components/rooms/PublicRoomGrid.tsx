@@ -60,6 +60,17 @@ export default function PublicRoomGrid({ rooms }: { rooms: any[] }) {
             <div className="flex-1 h-px bg-gray-200"></div>
           </div>
 
+          {/* === TAMBAHAN WADAH GAMBAR DENAH === */}
+          <div className="mb-8 flex justify-center px-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src={`/booking/lantai_${floor}.png`} 
+              alt={`Denah Letak Kamar Lantai ${floor}`}
+              className="w-full max-w-2xl rounded-2xl shadow-sm border border-gray-100 object-contain bg-white"
+            />
+          </div>
+          {/* === AKHIR WADAH GAMBAR DENAH === */}
+
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {rooms.filter(r => r.floor === floor).map((kamar) => {
               // AMBIL HARGA DAN NAMA KELAS DARI RELASI DATABASE
@@ -73,7 +84,8 @@ export default function PublicRoomGrid({ rooms }: { rooms: any[] }) {
                   // Tambahkan disable klik jika sedang loading
                   className={`p-4 rounded-2xl border-2 transition-all cursor-pointer shadow-sm flex flex-col justify-between ${
                     kamar.status === 'available' 
-                    ? (loadingId === kamar.id ? 'bg-gray-50 border-blue-300' : 'bg-white border-transparent hover:border-blue-500 hover:shadow-lg') 
+                    ? (loadingId === kamar.id ? 'bg-gray-50 border-blue-300' : 
+                      'bg-white border-transparent hover:border-blue-500 hover:shadow-lg') 
                     : 'bg-gray-100 border-gray-200 opacity-60 cursor-not-allowed'
                   } ${loadingId ? 'pointer-events-none' : ''}`}
                 >
@@ -98,7 +110,8 @@ export default function PublicRoomGrid({ rooms }: { rooms: any[] }) {
                     {kamar.status === 'available' && (
                       <button 
                         disabled={loadingId === kamar.id}
-                        className="mt-4 w-full py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-colors disabled:opacity-50 disabled:bg-gray-200 disabled:text-gray-500"
+                        className="mt-4 w-full py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-600 
+                        hover:text-white transition-colors disabled:opacity-50 disabled:bg-gray-200 disabled:text-gray-500"
                       >
                         {loadingId === kamar.id ? 'Mengecek...' : 'Pesan Sekarang'}
                       </button>

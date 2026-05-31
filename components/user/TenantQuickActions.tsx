@@ -30,7 +30,7 @@ export default function TenantQuickActions({ tenantName, roomNumber }: QuickActi
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
       {/* Tombol Lapor Kerusakan */}
-      <Link href="/complaint" className="bg-white p-5 rounded-2xl border shadow-sm hover:shadow-md hover:border-red-200 transition-all flex items-center gap-4 group">
+      <Link href="/lapor" className="bg-white p-5 rounded-2xl border shadow-sm hover:shadow-md hover:border-red-200 transition-all flex items-center gap-4 group">
         <div className="bg-red-50 p-4 rounded-xl group-hover:bg-red-100 transition-colors">
           <span className="text-2xl">🛠️</span>
         </div>

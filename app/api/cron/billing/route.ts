@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    // 1. UPDATE KUERI: Dompleng data harga dari tabel room_classes
+    // UPDATE KUERI
     const { data: activeBookings, error: bookingError } = await supabaseAdmin
       .from('bookings')
       .select(`
@@ -30,26 +30,26 @@ export async function GET(req: Request) {
     const currentYear = today.getFullYear();
     let processedCount = 0;
 
-    // Tambahkan 'as any[]' untuk mencegah error TypeScript karena struktur bersarang
+    
     for (const booking of activeBookings as any[]) {
       const startDate = new Date(booking.start_date);
       const billDay = startDate.getDate(); // Ambil tanggal masuknya (misal: 15)
 
-      // 1. Tentukan tanggal jatuh tempo untuk bulan ini
+      // Tentukan tanggal jatuh tempo untuk bulan ini
       // objek tanggal untuk jatuh tempo bulan ini (misal: 15 Mei 2026)
       const dueDateThisMonth = new Date(currentYear, currentMonth - 1, billDay);
       
-      // 2. Hitung kapan notifikasi harus dikirim (H-3 dari jatuh tempo)
+      // Hitung kapan notifikasi harus dikirim (H-3 dari jatuh tempo)
       const notificationDate = new Date(dueDateThisMonth);
       notificationDate.setDate(dueDateThisMonth.getDate() - 3);
 
-      // 3. CEK: Apakah HARI INI adalah jadwal kirim notifikasi?
+      // CEK: Apakah HARI INI adalah jadwal kirim notifikasi?
       const isTodayNotificationDay = 
         today.getDate() === notificationDate.getDate() &&
         today.getMonth() === notificationDate.getMonth();
 
       if (isTodayNotificationDay) {
-        // 4. Pastikan tidak double: Cek apakah invoice bulan ini sudah dibuat?
+        // Pastikan tidak double: Cek apakah invoice bulan ini sudah dibuat?
         const firstDayOfMonth = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
         const lastDayOfMonth = `${currentYear}-${String(currentMonth).padStart(2, '0')}-31`;
 
@@ -62,11 +62,11 @@ export async function GET(req: Request) {
           .maybeSingle();
 
         if (!existingInvoice) {
-          // 2. UPDATE VARIABEL: Ambil nominal harga dari relasi kelas
+          // UPDATE VARIABEL: Ambil nominal harga dari relasi kelas
           const amount = booking.rooms?.room_classes?.price || 0;
           const formattedDueDate = dueDateThisMonth.toISOString().split('T')[0];
 
-          // 5. Buat Invoice
+          // Buat Invoice
           const { data: newInvoice, error: invError } = await supabaseAdmin
             .from('invoices')
             .insert({
@@ -78,7 +78,7 @@ export async function GET(req: Request) {
             .select().single();
 
           if (!invError && newInvoice) {
-            // 6. Kirim WhatsApp
+            // Kirim WhatsApp
             const pesan = `Halo *${booking.users.full_name}* 👋\n\nKamar *${booking.rooms.room_number}*\n\nSekedar mengingatkan bahwa 3 hari lagi adalah waktu pembayaran kost.\n\nNominal: *Rp ${amount.toLocaleString('id-ID')}*\nJatuh tempo: *${formattedDueDate}*\n\nMohon siapkan pembayarannya ya. Terima kasih!`;
             
             const isSent = await sendWhatsApp(booking.users.phone_number, pesan);

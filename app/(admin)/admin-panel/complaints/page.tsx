@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAdminComplaints, updateComplaintStatus } from "@/app/actions/adminComplaintActions";
+import { getAdminComplaints, updateComplaintStatus, deleteComplaint } from "@/app/actions/adminComplaintActions";
 
 export default function AdminComplaintsPage() {
   const [complaints, setComplaints] = useState<any[]>([]);
@@ -28,6 +28,22 @@ export default function AdminComplaintsPage() {
     
     // Kirim perubahan ke database
     await updateComplaintStatus(id, newStatus);
+  };
+
+  // Fungsi saat admin menghapus keluhan yang sudah selesai
+  const handleDelete = async (id: string) => {
+    const confirm = window.confirm("Apakah Anda yakin ingin menghapus data keluhan ini secara permanen?");
+    if (!confirm) return;
+
+    // Hapus dari UI sementara
+    setComplaints(prev => prev.filter(c => c.id !== id));
+
+    // Eksekusi penghapusan di database
+    const res = await deleteComplaint(id);
+    if (!res.success) {
+      alert("Gagal menghapus keluhan. Silakan coba lagi.");
+      fetchComplaints(); // Kembalikan data jika gagal
+    }
   };
 
   // Desain Badge Warna untuk Status
@@ -72,13 +88,15 @@ export default function AdminComplaintsPage() {
                 complaints.map((keluhan) => (
                   <tr key={keluhan.id} className="hover:bg-gray-50 transition-colors">
                     {/* Tanggal */}
-                    <td className="p-4 text-sm text-gray-600">
+                    <td className="p-4 text-sm text-gray-600 whitespace-nowrap">
                       {new Date(keluhan.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </td>
                     
-                    {/* Nomor Kamar (Dari relasi Supabase) */}
+                    {/* Nomor Kamar */}
                     <td className="p-4">
-                      <span className="text-lg font-black text-gray-900">{keluhan.rooms?.room_number || '?'}</span>
+                      <span className="text-lg font-black text-gray-900 bg-gray-100 px-3 py-1 rounded-lg">
+                        {keluhan.rooms?.room_number || '?'}
+                      </span>
                     </td>
                     
                     {/* Detail Keluhan */}
@@ -94,17 +112,35 @@ export default function AdminComplaintsPage() {
                       {getStatusBadge(keluhan.status)}
                     </td>
                     
-                    {/* Aksi Ubah Status */}
+                    {/* Aksi Ubah Status & Tombol Hapus */}
                     <td className="p-4 text-right">
-                      <select
-                        value={keluhan.status}
-                        onChange={(e) => handleStatusChange(keluhan.id, e.target.value)}
-                        className="p-2 text-sm border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
-                      >
-                        <option value="pending">Menunggu</option>
-                        <option value="diproses">Diproses</option>
-                        <option value="selesai">Selesai</option>
-                      </select>
+                      <div className="flex items-center justify-end gap-2">
+                        <select
+                          value={keluhan.status}
+                          onChange={(e) => handleStatusChange(keluhan.id, e.target.value)}
+                          className={`p-2 text-sm border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer ${
+                            keluhan.status === 'selesai' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-white border-gray-300'
+                          }`}
+                        >
+                          <option value="pending">Menunggu</option>
+                          <option value="diproses">Diproses</option>
+                          <option value="selesai">Selesai</option>
+                        </select>
+
+                        {/* Tombol Hapus: Hanya muncul jika statusnya 'selesai' */}
+                        {keluhan.status === 'selesai' && (
+                          <button
+                            onClick={() => handleDelete(keluhan.id)}
+                            title="Hapus riwayat keluhan"
+                            className="p-2 text-red-500 hover:text-white hover:bg-red-500 border border-red-200 hover:border-red-500 rounded-lg transition-all focus:outline-none"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 
+                              01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

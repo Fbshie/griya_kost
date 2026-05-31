@@ -46,3 +46,22 @@ export async function updateComplaintStatus(complaintId: string, newStatus: stri
     return { success: false };
   }
 }
+
+// Fungsi untuk menghapus keluhan
+export async function deleteComplaint(id: string) {
+  try {
+    const { error } = await supabaseAdmin
+      .from('complaints')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    
+    // Refresh halaman agar data terbaru langsung muncul
+    revalidatePath('/admin-panel/complaints');
+    return { success: true };
+  } catch (error) {
+    console.error("Gagal menghapus keluhan:", error);
+    return { success: false };
+  }
+}
