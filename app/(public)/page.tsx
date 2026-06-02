@@ -53,7 +53,7 @@ export default async function HomePage() {
           </h1>
           
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Kost Griya Citra menawarkan hunian eksklusif dengan fasilitas lengkap, keamanan 24 jam, dan lokasi yang strategis di Pontianak. Pesan kamar Anda sekarang dengan sistem pintar kami.
+            Kost Griya Citra menawarkan hunian eksklusif dengan fasilitas lengkap, keamanan 24 jam, dan lokasi yang strategis dekat dengan kampus Untan, Polnep, dan UMP. Pesan kamar Anda sekarang lewat website secara langsung.
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -125,7 +125,7 @@ export default async function HomePage() {
           <div className="mb-16 text-center">
             <h2 className="text-3xl font-black text-gray-900 mb-4">Pilihan Kelas Kamar</h2>
             <p className="text-gray-500 max-w-2xl mx-auto">
-              Pilih fasilitas yang paling sesuai dengan kebutuhan dan anggaran Anda. Semua kamar didesain untuk kenyamanan istirahat maksimal.
+              Pilih fasilitas yang paling sesuai dengan kebutuhan dan anggaran Anda.
             </p>
           </div>
 
