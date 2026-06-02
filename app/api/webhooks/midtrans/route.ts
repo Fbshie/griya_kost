@@ -65,19 +65,26 @@ export async function POST(req: Request) {
 
         console.log(`✅ Status Invoice ${invoice.id} diubah menjadi Paid via ${methodString}`);
 
+        // Perbaikan TypeScript: Bypass tipe data relasi objek join
+        const bookingData = invoice.bookings as any;
+        const userData = bookingData?.users;
+        const roomData = bookingData?.rooms;
+
         // 2. KIRIM NOTIFIKASI WHATSAPP KE PENYEWA
-        const tenantName = invoice.bookings.users.full_name;
-        const phone = invoice.bookings.users.phone_number;
-        const roomNumber = invoice.bookings.rooms?.room_number || '-';
+        const tenantName = userData?.full_name || 'Penyewa';
+        const phone = userData?.phone_number;
+        const roomNumber = roomData?.room_number || '-';
         
-        const pesanPenyewa = `Halo *${tenantName}*,\n\nPembayaran kost Griya Citra sebesar *Rp ${invoice.amount.toLocaleString('id-ID')}* via *${methodString}* telah kami terima dan berstatus *LUNAS*.\n\nTerima kasih! 🙏`;
-        await sendWhatsApp(phone, pesanPenyewa);
-        console.log("📱 Notifikasi WA terkirim ke penyewa:", phone);
+        if (phone) {
+          const pesanPenyewa = `Halo *${tenantName}*,\n\nPembayaran kost Griya Citra sebesar *Rp ${invoice.amount.toLocaleString('id-ID')}* via *${methodString}* telah kami terima dan berstatus *LUNAS*.\n\nTerima kasih! 🙏`;
+          await sendWhatsApp(phone, pesanPenyewa);
+          console.log("📱 Notifikasi WA terkirim ke penyewa:", phone);
+        }
 
         // 3. KIRIM NOTIFIKASI WHATSAPP KE HP ADMIN (Dengan Nomor WA Penyewa)
         const adminPhone = process.env.NEXT_PUBLIC_ADMIN_PHONE;
         if (adminPhone) {
-          const pesanAdmin = `🚨 *PEMBERITAHUAN PEMBAYARAN MASUK* 🚨\n\nHalo Admin, ada transaksi online yang berhasil diverifikasi otomatis oleh sistem!\n\n• *Nama Penyewa:* ${tenantName}\n• *No. WA Penyewa:* ${phone}\n• *Kamar Kost:* Kamar ${roomNumber}\n• *Nominal:* Rp ${invoice.amount.toLocaleString('id-ID')}\n• *Metode Bayar:* ${methodString}\n• *Status Invoice:* LUNAS (Settlement)\n\nSilakan hubungi penyewa untuk koordinasi lebih lanjut atau cek halaman tagihan di dashboard utama. 🏢`;
+          const pesanAdmin = `🚨 *PEMBERITAHUAN PEMBAYARAN MASUK* 🚨\n\nHalo Admin, ada transaksi online yang berhasil diverifikasi otomatis oleh sistem!\n\n• *Nama Penyewa:* ${tenantName}\n• *No. WA Penyewa:* ${phone || '-'}\n• *Kamar Kost:* Kamar ${roomNumber}\n• *Nominal:* Rp ${invoice.amount.toLocaleString('id-ID')}\n• *Metode Bayar:* ${methodString}\n• *Status Invoice:* LUNAS (Settlement)\n\nSilakan hubungi penyewa untuk koordinasi lebih lanjut atau cek halaman tagihan di dashboard utama. 🏢`;
           
           await sendWhatsApp(adminPhone, pesanAdmin);
           console.log("📱 Notifikasi WA sukses diteruskan ke Admin:", adminPhone);

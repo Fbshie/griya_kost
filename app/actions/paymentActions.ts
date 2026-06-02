@@ -23,6 +23,10 @@ export async function generateSnapToken(invoiceId: string) {
     // Format: INV-[ID_SUPABASE]-[TIMESTAMP] agar tidak bentrok
     const orderId = `INV-${invoice.id.substring(0,8)}-${Date.now()}`;
 
+    // Perbaikan TypeScript: Bypass tipe data relasi objek join
+    const bookingData = invoice.bookings as any;
+    const userData = bookingData?.users;
+
     // 3. Siapkan parameter untuk Midtrans
     const parameter = {
       transaction_details: {
@@ -30,9 +34,9 @@ export async function generateSnapToken(invoiceId: string) {
         gross_amount: invoice.amount
       },
       customer_details: {
-        first_name: invoice.bookings.users.full_name,
-        email: invoice.bookings.users.email || "noemail@test.com",
-        phone: invoice.bookings.users.phone_number
+        first_name: userData?.full_name || "Penyewa",
+        email: userData?.email || "noemail@test.com",
+        phone: userData?.phone_number || ""
       },
       // Opsional: Batasi hanya menerima QRIS dan Transfer Bank
       enabled_payments: ["credit_card", "mandiri_clickpay", "cimb_clicks", "bca_klikbca", "bca_klikpay", "bri_epay", "echannel", "permata_va", "bca_va", "bni_va", "bri_va", "other_va", "gopay", "indomaret", "danamon_online", "akulaku", "shopeepay", "qris"]

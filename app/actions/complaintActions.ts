@@ -34,7 +34,9 @@ export async function submitComplaint(formData: FormData) {
       };
     }
 
-    const roomNumber = activeBooking.rooms?.room_number || "Tidak diketahui";
+    // Perbaikan TypeScript: Bypass tipe data relasi objek join
+    const roomData = activeBooking.rooms as any;
+    const roomNumber = roomData?.room_number || "Tidak diketahui";
 
     // 2. MASUKKAN KELUHAN KE DATABASE
     const { error: insertError } = await supabaseAdmin
@@ -53,7 +55,7 @@ export async function submitComplaint(formData: FormData) {
     }
 
     // 3. KIRIM NOTIFIKASI WHATSAPP KE ADMIN (Menggunakan Fonnte API)
-    const adminPhone = process.env.NEXT_PUBLIC_ADMIN_PHONE || ""; // <-- GANTI DENGAN NOMOR WA ADMIN (Awali dengan 08 / 62)
+    const adminPhone = process.env.NEXT_PUBLIC_ADMIN_PHONE || ""; 
     const waToken = process.env.FONNTE_TOKEN || ""; 
 
     const waMessage = `*🚨 LAPORAN KELUHAN BARU 🚨*\n\n*Kamar:* ${roomNumber}\n*Kategori:* ${title}\n*Detail:* ${description}\n\nMohon segera cek Dasbor Admin untuk menindaklanjuti.`;
@@ -62,7 +64,7 @@ export async function submitComplaint(formData: FormData) {
       await fetch("https://api.fonnte.com/send", {
         method: "POST",
         headers: {
-          "Authorization": waToken, // Token rahasia dari akun Fonnte
+          "Authorization": waToken, 
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -72,8 +74,6 @@ export async function submitComplaint(formData: FormData) {
       });
       console.log("Notifikasi WA berhasil dikirim!");
     } catch (waError) {
-      // Kita bungkus dalam try-catch terpisah agar jika WA gagal, 
-      // keluhan tetap tersimpan di database dan user tetap melihat pesan sukses.
       console.error("Gagal mengirim WA:", waError);
     }
 

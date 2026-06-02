@@ -36,8 +36,11 @@ export async function getDashboardStats() {
 
     if (invoices) {
       invoices.forEach((inv) => {
+        // Perbaikan TypeScript: Cast objek booking menjadi 'any' agar aman di-build
+        const bookingData = inv.bookings as any;
+
         // Hanya proses invoice dari penyewa yang masih aktif
-        if (inv.bookings?.status === 'active') {
+        if (bookingData?.status === 'active') {
           if (inv.status === "paid") {
             totalRevenue += inv.amount;
           } else if (inv.status === "unpaid") {
@@ -48,8 +51,8 @@ export async function getDashboardStats() {
           // Masukkan ke daftar detail untuk tabel
           detailedList.push({
             id: inv.id,
-            userName: inv.bookings.users?.full_name || "Penyewa",
-            roomNumber: inv.bookings.rooms?.room_number || "-",
+            userName: bookingData?.users?.full_name || "Penyewa",
+            roomNumber: bookingData?.rooms?.room_number || "-",
             amount: inv.amount,
             status: inv.status,
             dueDate: inv.due_date,

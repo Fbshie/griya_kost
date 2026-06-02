@@ -28,7 +28,8 @@ export default function DashboardStats() {
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
           <div className="p-4 bg-green-50 rounded-xl">
             <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 
+              2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
           <div>
@@ -41,7 +42,8 @@ export default function DashboardStats() {
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
           <div className="p-4 bg-blue-50 rounded-xl">
             <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m3-4h1m-1 4h1m-5 8h8"></path>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 
+              7h1m-1 4h1m3-4h1m-1 4h1m-5 8h8"></path>
             </svg>
           </div>
           <div>
@@ -56,7 +58,9 @@ export default function DashboardStats() {
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
           <div className="p-4 bg-red-50 rounded-xl">
             <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 
+              4c-.77-1.333-2.694-1.333-3.464 
+              0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
             </svg>
           </div>
           <div>
@@ -103,14 +107,16 @@ export default function DashboardStats() {
                     <td className="px-6 py-4 font-medium">Rp {inv.amount.toLocaleString('id-ID')}</td>
                     <td className="px-6 py-4 text-center">
                       <span className={`px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider ${
-                        inv.status === 'paid' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'
+                        inv.status === 'paid' ? 'bg-green-100 text-green-700 border border-green-200' : 
+                        'bg-red-100 text-red-700 border border-red-200'
                       }`}>
                         {inv.status === 'paid' ? 'Lunas' : 'Belum Bayar'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       {inv.paymentMethod ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-100 text-xs font-semibold text-gray-700 border border-gray-200">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md 
+                        bg-gray-100 text-xs font-semibold text-gray-700 border border-gray-200">
                           {inv.paymentMethod}
                         </span>
                       ) : (

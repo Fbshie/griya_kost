@@ -101,8 +101,10 @@ export async function createBooking(formData: FormData) {
 
     // E. Susun dan Kirim Pesan WhatsApp Dinamis
     const pesanWA = isOffline 
-      ? `Halo *${fullName}* 👋\n\nSelamat datang di Kost Griya Citra!\nKamar *${roomNumber}* Anda telah berhasil didaftarkan.\n\nPembayaran bulan pertama sebesar *Rp ${amount.toLocaleString('id-ID')}* telah kami terima dan berstatus *LUNAS*.\n\nTerima kasih!`
-      : `Halo *${fullName}* 👋\n\nSelamat datang di Kost Griya Citra! Kamar *${roomNumber}* Anda telah berhasil didaftarkan.\n\nTagihan bulan pertama Anda sebesar *Rp ${amount.toLocaleString('id-ID')}* telah terbit dan jatuh tempo pada tanggal ${startDate}.\n\nTerima kasih!`;
+      ? `Halo *${fullName}* 👋\n\nSelamat datang di Kost Griya Citra!\nKamar *${roomNumber}* Anda telah berhasil didaftarkan.\n\nPembayaran bulan pertama sebesar 
+      *Rp ${amount.toLocaleString('id-ID')}* telah kami terima dan berstatus *LUNAS*.\n\nTerima kasih!`
+      : `Halo *${fullName}* 👋\n\nSelamat datang di Kost Griya Citra! Kamar *${roomNumber}* Anda telah berhasil didaftarkan.\n\nTagihan bulan pertama Anda sebesar 
+      *Rp ${amount.toLocaleString('id-ID')}* telah terbit dan jatuh tempo pada tanggal ${startDate}.\n\nTerima kasih!`;
     
     const isSent = await sendWhatsApp(phone, pesanWA);
 

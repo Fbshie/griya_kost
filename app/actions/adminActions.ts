@@ -64,14 +64,16 @@ export async function markAsPaidManual(formData: FormData) {
     throw new Error("Gagal melunaskan tagihan");
   }
 
-  // 4. KIRIM NOTIFIKASI WA KHUSUS PEMBAYARAN MANUAL
-  const tenantName = invoiceData.bookings.users.full_name;
-  const phone = invoiceData.bookings.users.phone_number;
+  // 4. KIRIM NOTIFIKASI WA KHUSUS PEMBAYARAN MANUAL (Perbaikan TypeScript)
+  const bookingData = invoiceData.bookings as any;
+  const tenantName = bookingData?.users?.full_name || 'Penyewa';
+  const phone = bookingData?.users?.phone_number;
   
   // Teksnya dibedakan sedikit agar penyewa tahu ini divalidasi oleh Admin
-  const pesan = `Halo *${tenantName}*,\n\nPembayaran tunai/manual untuk kamar Anda sebesar *Rp ${invoiceData.amount.toLocaleString('id-ID')}* telah kami terima dan diverifikasi oleh Admin. Status tagihan bulan ini sekarang *LUNAS*.\n\nTerima kasih! 🙏`;
-  
-  await sendWhatsApp(phone, pesan);
+  if (phone) {
+    const pesan = `Halo *${tenantName}*,\n\nPembayaran tunai/manual untuk kamar Anda sebesar *Rp ${invoiceData.amount.toLocaleString('id-ID')}* telah kami terima dan diverifikasi oleh Admin. Status tagihan bulan ini sekarang *LUNAS*.\n\nTerima kasih! 🙏`;
+    await sendWhatsApp(phone, pesan);
+  }
 
   // 5. Refresh halaman
   revalidatePath('/admin-panel');
@@ -94,22 +96,26 @@ export async function sendPaymentReminder(invoiceId: string) {
     throw new Error("Data tagihan tidak ditemukan");
   }
 
-  const tenantName = invoice.bookings.users.full_name;
-  const phone = invoice.bookings.users.phone_number;
+  // Perbaikan TypeScript
+  const bookingData = invoice.bookings as any;
+  const tenantName = bookingData?.users?.full_name || 'Penyewa';
+  const phone = bookingData?.users?.phone_number;
   
   // Format tanggal jatuh tempo menjadi lebih rapi (opsional)
   const dueDate = new Date(invoice.due_date).toLocaleDateString('id-ID', {
     day: 'numeric', month: 'long', year: 'numeric'
   });
 
-  // 2. Siapkan Teks Pesan Fonnte
-  const pesan = `Halo *${tenantName}*,\n\nIni adalah pesan pengingat otomatis dari Admin Kost Griya Citra. 🏠\n\nTagihan kamar Anda sebesar *Rp ${invoice.amount.toLocaleString('id-ID')}* untuk bulan ini belum kami terima.\n\nMohon segera melakukan pembayaran melalui website untuk menghindari denda atau pemutusan akses kamar. Jika sudah membayar, mohon abaikan pesan ini.\n\nTerima kasih! 🙏`;
+  if (phone) {
+    // 2. Siapkan Teks Pesan Fonnte
+    const pesan = `Halo *${tenantName}*,\n\nIni adalah pesan pengingat otomatis dari Admin Kost Griya Citra. 🏠\n\nTagihan kamar Anda sebesar *Rp ${invoice.amount.toLocaleString('id-ID')}* untuk bulan ini belum kami terima.\n\nMohon segera melakukan pembayaran melalui website untuk menghindari denda atau pemutusan akses kamar. Jika sudah membayar, mohon abaikan pesan ini.\n\nTerima kasih! 🙏`;
 
-  // 3. Kirim pesan WA
-  const waResponse = await sendWhatsApp(phone, pesan);
+    // 3. Kirim pesan WA
+    const waResponse = await sendWhatsApp(phone, pesan);
 
-  if (!waResponse) {
-    throw new Error("Gagal mengirim pesan WhatsApp via Fonnte");
+    if (!waResponse) {
+      throw new Error("Gagal mengirim pesan WhatsApp via Fonnte");
+    }
   }
 
   // 4. Update waktu pengingat terakhir di database

@@ -52,23 +52,29 @@ export async function GET(req: Request) {
             }
 
             if (bolehKirim) {
-                const tenantName = invoice.bookings.users.full_name;
-                const phone = invoice.bookings.users.phone_number;
+                // Perbaikan TypeScript: Bypass tipe data relasi objek join
+                const bookingData = invoice.bookings as any;
+                const userData = bookingData?.users;
+                
+                const tenantName = userData?.full_name || "Penyewa";
+                const phone = userData?.phone_number;
 
-                const pesan = `Halo *${tenantName}*,\n\nIni adalah sistem pengingat otomatis Kost Griya Citra. 🤖\n\nKami menginformasikan bahwa tagihan kamar Anda sebesar *Rp ${invoice.amount.toLocaleString('id-ID')}* masih berstatus *BELUM LUNAS*.\n\nMohon segera selesaikan pembayaran Anda melalui website. Abaikan pesan ini jika Anda sudah membayar.\n\nTerima kasih! 🙏`;
+                if (phone) {
+                    const pesan = `Halo *${tenantName}*,\n\nIni adalah sistem pengingat otomatis Kost Griya Citra. 🤖\n\nKami menginformasikan bahwa tagihan kamar Anda sebesar *Rp ${invoice.amount.toLocaleString('id-ID')}* masih berstatus *BELUM LUNAS*.\n\nMohon segera selesaikan pembayaran Anda melalui website. Abaikan pesan ini jika Anda sudah membayar.\n\nTerima kasih! 🙏`;
 
-                // Kirim WA
-                await sendWhatsApp(phone, pesan);
+                    // Kirim WA
+                    await sendWhatsApp(phone, pesan);
 
-                // Update database bahwa reminder sudah dikirim hari ini
-                await supabaseAdmin
-                    .from('invoices')
-                    .update({ last_reminder_at: sekarang.toISOString() })
-                    .eq('id', invoice.id);
+                    // Update database bahwa reminder sudah dikirim hari ini
+                    await supabaseAdmin
+                        .from('invoices')
+                        .update({ last_reminder_at: sekarang.toISOString() })
+                        .eq('id', invoice.id);
 
-                terkirim++;
+                    terkirim++;
 
-                await delay(2000);
+                    await delay(2000);
+                }
             }
         }
 
