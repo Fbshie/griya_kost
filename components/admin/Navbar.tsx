@@ -52,7 +52,7 @@ const Header = () => {
           
           <div className="hidden sm:block border-l h-6 border-gray-300"></div>
           
-          <UserButton afterSignOutUrl="/" />
+          <UserButton/>
 
           {/* Tombol Hamburger Mobile */}
           <button
