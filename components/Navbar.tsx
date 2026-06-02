@@ -1,6 +1,7 @@
 'use client'
 
-import { useUser, SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs'
+// PERUBAHAN 1: Hapus SignedIn/SignedOut, ganti dengan Show
+import { useUser, Show, SignInButton, UserButton } from '@clerk/nextjs'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useState, useEffect } from 'react'
@@ -42,15 +43,17 @@ const Navbar = () => {
 
                     <Link className="text-gray-600 hover:text-blue-600 font-semibold transition-colors" href={'/#lokasi'}>Lokasi</Link>
 
-                    <SignedOut>
+                    {/* PERUBAHAN 2: Ganti SignedOut */}
+                    <Show when="signed-out">
                         <SignInButton mode="modal">
                             <button className="rounded-full border-2 border-blue-600 px-6 py-2 text-blue-600 font-bold hover:bg-blue-600 hover:text-white transition-all">
                                 Login
                             </button>
                         </SignInButton>
-                    </SignedOut>
+                    </Show>
 
-                    <SignedIn>
+                    {/* PERUBAHAN 3: Ganti SignedIn */}
+                    <Show when="signed-in">
                         <Link className="text-gray-600 hover:text-blue-600 font-semibold transition-colors" href={'/rooms'}>Pesan Kamar</Link>
                         
                         {/* LINK DASHBOARD PENYEWA: Hanya muncul jika bukan admin DAN punya kamar */}
@@ -68,14 +71,14 @@ const Navbar = () => {
                         <div className="ml-2 border-l pl-4 border-gray-300">
                             <UserButton afterSignOutUrl="/" />
                         </div>
-                    </SignedIn>
+                    </Show>
                 </nav>
 
                 {/* Tombol Hamburger Menu (Hanya Muncul di HP) */}
                 <div className="md:hidden flex items-center gap-4">
-                    <SignedIn>
+                    <Show when="signed-in">
                         <UserButton afterSignOutUrl="/" />
-                    </SignedIn>
+                    </Show>
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         className="p-2 text-gray-600 hover:text-blue-600 focus:outline-none rounded-lg bg-gray-50"
@@ -102,15 +105,15 @@ const Navbar = () => {
                         Lokasi
                     </Link>
 
-                    <SignedOut>
+                    <Show when="signed-out">
                         <SignInButton mode="modal">
                             <button className="w-full rounded-xl border-2 border-blue-600 px-4 py-3 text-blue-600 font-bold hover:bg-blue-600 hover:text-white transition-all mt-2">
                                 Login untuk Melanjutkan
                             </button>
                         </SignInButton>
-                    </SignedOut>
+                    </Show>
 
-                    <SignedIn>
+                    <Show when="signed-in">
                         <Link href={'/rooms'} onClick={() => setIsMobileMenuOpen(false)} className="block w-full text-left text-gray-600 hover:text-blue-600 font-semibold py-2">
                             Pesan Kamar
                         </Link>
@@ -127,7 +130,7 @@ const Navbar = () => {
                                 Admin Panel
                             </Link>
                         )}
-                    </SignedIn>
+                    </Show>
                 </div>
             )}
         </header>
