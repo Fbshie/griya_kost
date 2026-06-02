@@ -69,7 +69,8 @@ const Navbar = () => {
                             </Link>
                         )}
                         <div className="ml-2 border-l pl-4 border-gray-300">
-                            <UserButton afterSignOutUrl="/" />
+                            {/* DIPERBAIKI: Hapus afterSignOutUrl */}
+                            <UserButton />
                         </div>
                     </Show>
                 </nav>
@@ -77,7 +78,8 @@ const Navbar = () => {
                 {/* Tombol Hamburger Menu (Hanya Muncul di HP) */}
                 <div className="md:hidden flex items-center gap-4">
                     <Show when="signed-in">
-                        <UserButton afterSignOutUrl="/" />
+                        {/* DIPERBAIKI: Hapus afterSignOutUrl */}
+                        <UserButton />
                     </Show>
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
