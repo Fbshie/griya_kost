@@ -45,11 +45,14 @@ export default async function TenantDashboard() {
     );
   }
 
-  // 3. AMBIL NAMA LENGKAP DARI DATABASE (Jika kosong, baru pakai nama akun sebagai cadangan)
-  const tenantFullName = booking.users?.full_name || user.firstName || 'Penyewa';
+  // 3. AMBIL NAMA LENGKAP DARI DATABASE (Perbaikan TypeScript Build Error)
+  // Kita bypass pengecekan ketat TypeScript dengan "as any"
+  const userData = booking.users as any;
+  const tenantFullName = userData?.full_name || user.firstName || 'Penyewa';
 
   const unpaidInvoices = booking.invoices?.filter((inv: any) => inv.status === 'unpaid') || [];
-  const roomNumber = booking.rooms?.room_number || '-';
+  const roomNumber = (booking.rooms as any)?.room_number || '-';
+  const roomFloor = (booking.rooms as any)?.floor || '-';
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto min-h-screen">
@@ -63,7 +66,6 @@ export default async function TenantDashboard() {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <p className="text-blue-100 font-medium mb-1">Dashboard Penyewa</p>
-            {/* UBAH NAMA DI SINI MENGGUNAKAN VARIABEL BARU */}
             <h1 className="text-3xl md:text-4xl font-black mb-2">Halo, {tenantFullName}! 👋</h1>
             <p className="text-blue-50 max-w-md leading-relaxed">
               Selamat datang di pusat kendali kost Anda. Cek tagihan dan manfaatkan layanan kami dengan mudah.
@@ -73,7 +75,7 @@ export default async function TenantDashboard() {
             <p className="text-blue-100 text-sm font-medium mb-1">Kamar Anda Saat Ini</p>
             <p className="text-4xl font-black text-white">{roomNumber}</p>
             <p className="text-xs text-blue-100 mt-1 bg-black/20 rounded-full py-1 px-3 inline-block">
-              Lantai {booking.rooms?.floor || '-'}
+              Lantai {roomFloor}
             </p>
           </div>
         </div>
@@ -84,7 +86,6 @@ export default async function TenantDashboard() {
         <h2 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
           <span>⚡</span> Menu Cepat
         </h2>
-        {/* KIRIM NAMA LENGKAP KE KOMPONEN TOMBOL AGAR WA KE ADMIN JUGA PAKAI NAMA ASLI */}
         <TenantQuickActions tenantName={tenantFullName} roomNumber={roomNumber} />
       </div>
 
