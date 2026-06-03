@@ -64,7 +64,7 @@ export default function DashboardStats() {
             </svg>
           </div>
           <div>
-            <p className="text-sm font-bold text-gray-500">Belum Lunas ({stats.unpaidCount} Kamar)</p>
+            <p className="text-sm font-bold text-gray-500">Belum Lunas ({stats.unpaidCount} Tagihan)</p>
             <p className="text-2xl font-black text-red-600">Rp {stats.totalUnpaid.toLocaleString('id-ID')}</p>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function DashboardStats() {
               <tr>
                 <th className="px-6 py-4">Kamar</th>
                 <th className="px-6 py-4">Nama Penyewa</th>
-                <th className="px-6 py-4">Tanggal Masuk</th>
+                <th className="px-6 py-4">Jatuh Tempo</th>
                 <th className="px-6 py-4">Nominal</th>
                 <th className="px-6 py-4 text-center">Status</th>
                 <th className="px-6 py-4">Metode Pembayaran</th>
