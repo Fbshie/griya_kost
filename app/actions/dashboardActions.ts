@@ -11,10 +11,15 @@ export async function getDashboardStats() {
 
     // 2. Ambil semua Invoices beserta relasi user dan kamar
     // HANYA ambil tagihan untuk bulan ini (atau yang belum lunas)
-    const currentMonth = new Date().getMonth() + 1;
-    const currentYear = new Date().getFullYear();
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1; // Bulan saat ini (1-12)
+    
+    // Trik mendapatkan hari terakhir di bulan yang sedang berjalan secara dinamis
+    const lastDayOfMonth = new Date(currentYear, currentMonth, 0).getDate(); 
+
     const firstDay = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
-    const lastDay = `${currentYear}-${String(currentMonth).padStart(2, '0')}-31`;
+    const lastDay = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${lastDayOfMonth}`;
 
     const { data: invoices } = await supabaseAdmin
       .from("invoices")
