@@ -10,48 +10,44 @@ export async function GET(req: Request) {
   }
 
   try {
-    // UPDATE KUERI
     const { data: activeBookings, error: bookingError } = await supabaseAdmin
       .from('bookings')
       .select(`
         id, room_id, user_id, start_date,
-        rooms ( 
-          room_number, 
-          room_classes ( price ) 
-        ),
+        rooms ( room_number, room_classes ( price ) ),
         users ( full_name, phone_number )
       `)
       .eq('status', 'active');
 
     if (bookingError) throw bookingError;
 
-    const today = new Date();
+    // PERBAIKAN 1: Paksa zona waktu Vercel menjadi WIB agar tidak meleset hari
+    const utcDate = new Date();
+    const today = new Date(utcDate.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+    
     const currentMonth = today.getMonth() + 1;
     const currentYear = today.getFullYear();
     let processedCount = 0;
 
-    
     for (const booking of activeBookings as any[]) {
       const startDate = new Date(booking.start_date);
-      const billDay = startDate.getDate(); // Ambil tanggal masuknya (misal: 15)
+      const billDay = startDate.getDate(); 
 
-      // Tentukan tanggal jatuh tempo untuk bulan ini
-      // objek tanggal untuk jatuh tempo bulan ini (misal: 15 Mei 2026)
       const dueDateThisMonth = new Date(currentYear, currentMonth - 1, billDay);
       
-      // Hitung kapan notifikasi harus dikirim (H-3 dari jatuh tempo)
       const notificationDate = new Date(dueDateThisMonth);
       notificationDate.setDate(dueDateThisMonth.getDate() - 3);
 
-      // CEK: Apakah HARI INI adalah jadwal kirim notifikasi?
       const isTodayNotificationDay = 
         today.getDate() === notificationDate.getDate() &&
         today.getMonth() === notificationDate.getMonth();
 
       if (isTodayNotificationDay) {
-        // Pastikan tidak double: Cek apakah invoice bulan ini sudah dibuat?
+        
+        // PERBAIKAN 2: Atasi Bug Tanggal 31 agar dinamis sesuai bulan berjalan
+        const lastDay = new Date(currentYear, currentMonth, 0).getDate();
         const firstDayOfMonth = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
-        const lastDayOfMonth = `${currentYear}-${String(currentMonth).padStart(2, '0')}-31`;
+        const lastDayOfMonth = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${lastDay}`;
 
         const { data: existingInvoice } = await supabaseAdmin
           .from('invoices')
@@ -62,11 +58,11 @@ export async function GET(req: Request) {
           .maybeSingle();
 
         if (!existingInvoice) {
-          // UPDATE VARIABEL: Ambil nominal harga dari relasi kelas
           const amount = booking.rooms?.room_classes?.price || 0;
-          const formattedDueDate = dueDateThisMonth.toISOString().split('T')[0];
+          
+          // Menggunakan String padding agar format tanggal (YYYY-MM-DD) tidak meleset
+          const formattedDueDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(billDay).padStart(2, '0')}`;
 
-          // Buat Invoice
           const { data: newInvoice, error: invError } = await supabaseAdmin
             .from('invoices')
             .insert({
@@ -78,7 +74,6 @@ export async function GET(req: Request) {
             .select().single();
 
           if (!invError && newInvoice) {
-            // Kirim WhatsApp
             const pesan = `Halo *${booking.users.full_name}* 👋\n\nKamar *${booking.rooms.room_number}*\n\nSekedar mengingatkan bahwa 3 hari lagi adalah waktu pembayaran kost.\n\nNominal: *Rp ${amount.toLocaleString('id-ID')}*\nJatuh tempo: *${formattedDueDate}*\n\nMohon siapkan pembayarannya ya. Terima kasih!`;
             
             const isSent = await sendWhatsApp(booking.users.phone_number, pesan);
