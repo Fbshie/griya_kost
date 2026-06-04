@@ -31,8 +31,16 @@ export async function GET(req: Request) {
 
     for (const booking of activeBookings as any[]) {
       const startDate = new Date(booking.start_date);
-      const billDay = startDate.getDate(); 
+      
+      // PERBAIKAN 3 (BARU): Cegah invoice ganda untuk penyewa masa depan
+      if (
+        currentYear < startDate.getFullYear() || 
+        (currentYear === startDate.getFullYear() && currentMonth < (startDate.getMonth() + 1))
+      ) {
+        continue; // Lewati penyewa ini, jangan buatkan tagihan dulu
+      }
 
+      const billDay = startDate.getDate(); 
       const dueDateThisMonth = new Date(currentYear, currentMonth - 1, billDay);
       
       const notificationDate = new Date(dueDateThisMonth);
